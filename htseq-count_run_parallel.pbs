@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# align RNA seq fastq files using STAR
+# 24 CPUs, 96Gb memory required per human/mouse sample
+# can map paired and single reads in a single job
+# Should scale to the number of reads in FASTQ file
+
+#PBS -P er01
+#PBS -N htseq-count
+#PBS -l walltime=05:00:00,ncpus=48,mem=192GB,wd
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l storage=scratch/er01
+#PBS -o ./Logs/htseq-count.o
+#PBS -e ./Logs/htseq-count.e
+
+module load openmpi/4.0.2
+module load nci-parallel/1.0.0
+module load python2
+
+set -e
+
+# NCPUs = CPUs per task
+NCPUS=1
+
+SCRIPT=./htseq-count.sh
+INPUTS=./Inputs/htseq-count.inputs
+
+
+echo "$(date): Get raw counts from sample BAMs using htseq-count"
+
+CPN=48 #CPUs per node
+M=$(( CPN / NCPUS )) #tasks per node
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np $((M * PBS_NCPUS / 48)) \
+        --map-by node:PE=${NCPUS} \
+        nci-parallel \
+        --verbose \
+        --input-file ${PBS_JOBFS}/input-file

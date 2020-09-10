@@ -1,0 +1,74 @@
+#!/bin/bash
+
+#########################################################
+#
+# Platform: NCI Gadi HPC
+# Description: Run fastqc for fastq files in parallel
+# Usage: Set up a <cohort>.config file using the template. Run
+# fastqc_make_input.sh <cohort> to create input file. 
+# Adjust compute resources using the guide below and
+# qsub fastqc_run_parallel.pbs
+# Job resource requirements:
+# ncpus = number of tasks (fastq files)/5
+# mem = ncpus*4
+# walltime = 01:00:00 (~5 min for 15M reads)
+# Author: Tracy Chew
+# tracy.chew@sydney.edu.au
+# Date last modified: 27/08/2020
+#
+# If you use this script towards a publication, please acknowledge the
+# Sydney Informatics Hub (or co-authorship, where appropriate).
+#
+# Suggested acknowledgement:
+# The authors acknowledge the scientific and technical assistance
+# <or e.g. bioinformatics assistance of <PERSON>> of Sydney Informatics
+# Hub and resources and services from the National Computational
+# Infrastructure (NCI), which is supported by the Australian Government
+# with access facilitated by the University of Sydney.
+#
+#########################################################
+
+# Run fastqc
+# 48 fastq file=walltime=00:10:00,ncpus=48,mem=192GB,wd
+# Multiply walltime or number of CPUs according to fastq number/size
+# fastQC efficiency ~0.9 - 1
+
+#PBS -P er01
+#PBS -N fastqc
+#PBS -l walltime=01:00:00,ncpus=19,mem=74GB,wd
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l storage=scratch/er01
+#PBS -o ./Logs/fastqc.o
+#PBS -e ./Logs/fastqc.e
+
+module load openmpi/4.0.2
+module load nci-parallel/1.0.0
+module load fastqc/0.11.7
+
+set -e
+
+# M = Number of processes per node
+# NCPUs = CPUs per task
+M=''
+if (( ${PBS_NCPUS}>= 48 )); then
+	M=48
+else
+	M=${PBS_NCPUS}
+fi
+
+NCPUS=1
+
+SCRIPT=./fastqc.sh
+INPUTS=./Inputs/fastqc.inputs
+
+echo "$(date): FastQC."
+
+sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
+
+mpirun --np ${M} \
+	--map-by core:pe=${NCPUS} \
+	--report-bindings \
+	nci-parallel \
+	--verbose \
+	--input-file ${PBS_JOBFS}/input-file
