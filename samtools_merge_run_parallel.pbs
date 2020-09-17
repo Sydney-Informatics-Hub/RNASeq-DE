@@ -27,7 +27,7 @@ SCRIPT=./samtools_merge.sh
 INPUTS=./Inputs/samtools_merge.inputs
 
 
-echo "$(date): Merge multiplexed samples with SAMtools merge."
+echo "$(date): Merge multiplexed samples with SAMtools merge, then index final BAMs."
 
 CPN=48 #CPUs per node
 M=$(( CPN / NCPUS )) #tasks per node
