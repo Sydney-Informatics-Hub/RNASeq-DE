@@ -29,21 +29,37 @@ You will then need to include:
 Your directory structure should resemble the following: 
 
 `.
+
 ├── Batch_1
+
 │   ├── sample1_1.fastq.gz
+
 │   └── sample1_2.fastq.gz
+
 ├── Batch_2
+
 │   └── sample2.fastq.gz
+
 ├── README.md
+
 ├── References
+
 │   ├── GRCh38
+
 |   |   └── Homo_sapiens.GRCh38.dna.primary_assembly.fa
+
 |   |   └── Homo_sapiens.GRCh38.94.gtf
+
 │   └── GRCm38
+
 |       └── Mus_musculus.GRCm38.dna.toplevel.fa
+
 |       └── Mus_musculus.GRCm38.98.gtf
+
 ├── samples.config
+
 └── Scripts
+
 `
 
 ## Software
