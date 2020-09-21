@@ -46,7 +46,7 @@ Your __RNASeq-DE__ directory structure should resemble the following:
 └── Scripts
 ```
 
-Edit the __samples.config__ file. An example is provided below:
+Edit the __samples.config__ file. This config file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files, so it is important that An example is provided below:
 
 |#FASTQ|	SAMPLEID|	DATASET|	REFERENCE_GRCh38_GRCm38|	SEQUENCING_CENTRE|	PLATFORM|	RUN_TYPE_SINGLE_PAIRED|	LIBRARY|
 |------|---------|----------|------------------------|--------------------|-----------|-------------------------|--------|
@@ -73,17 +73,17 @@ openmpi/4.0.2
 
 nci-parallel/1.0.0
 
-fastQC/0.11.7
-
 python3/3.8.5
 
-`pip3 install multiqc`
+SAMtools/1.10
+
+fastQC/0.11.7
 
 BBDuk/37.98
 
 STAR/2.7.3a
 
-SAMtools/1.10
+`pip3 install multiqc`
 
 `pip3 install RSeQC`
 
