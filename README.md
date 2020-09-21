@@ -26,7 +26,7 @@ You will then need to include:
     * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html) 
     * SIH's CloudStor, which contains already genomes already indexed for STAR v2.7.3a (coming soon)!
 
-Your directory structure should resemble the following: 
+Your __RNASeq-DE__ directory structure should resemble the following: 
 
 ```bash
 .
@@ -39,11 +39,11 @@ Your directory structure should resemble the following:
 ├── README.md
 ├── References
 │   ├── GRCh38
-|   |   └── Homo_sapiens.GRCh38.dna.primary_assembly.fa
-|   |   └── Homo_sapiens.GRCh38.94.gtf
+│   │   └── Homo_sapiens.GRCh38.dna.primary_assembly.fa
+│   │   └── Homo_sapiens.GRCh38.94.gtf
 │   └── GRCm38
-|       └── Mus_musculus.GRCm38.dna.toplevel.fa
-|       └── Mus_musculus.GRCm38.98.gtf
+│       └── Mus_musculus.GRCm38.dna.toplevel.fa
+│       └── Mus_musculus.GRCm38.98.gtf
 ├── samples.config
 └── Scripts
 ```
