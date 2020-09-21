@@ -49,6 +49,7 @@ Your __RNASeq-DE__ directory structure should resemble the following:
 Edit the __samples.config__ file. An example is provided below:
 
 |#FASTQ|	SAMPLEID|	DATASET|	REFERENCE_GRCh38_GRCm38|	SEQUENCING_CENTRE|	PLATFORM|	RUN_TYPE_SINGLE_PAIRED|	LIBRARY|
+|------|---------|----------|------------------------|--------------------|-----------|-------------------------|--------|
 |sample1_1.fastq.gz|	SAMPLEID1|	Batch_1|	GRCh38|	KCCG|	ILLUMINA|	PAIRED|	1|
 |sample1_2.fastq.gz|     SAMPLEID1|       Batch_1| GRCh38|  KCCG|    ILLUMINA|        PAIRED  1|
 |sample2.fastq.gz|	SAMPLEID2|	Batch_2|	GRCm38|	KCCG|	ILLUMINA|	SINGLE|	1|
@@ -56,6 +57,7 @@ Edit the __samples.config__ file. An example is provided below:
 Column descriptions for __samples.config__:
 
 |Column name| Description|
+|----|--------|
 |FASTQ| FASTQ file name. This column can be populated with `ls -1` in your sequencing batch directory|
 |SAMPLEID| The sample identifier used in your laboratory. This will be used in naming output files. No whitespace please.|
 |DATASET| The sequencing batch that the FASTQ file was generated, and the directory name where the FASTQ file is located. No whitespace please. |
