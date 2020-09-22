@@ -5,7 +5,8 @@ The scripts in this repository process RNA sequencing data (single, paired and/o
 1. FastQC to obtain quality reports on fastq files
 2. MultiQC to summaries quality reports on fastq files
 3. BBduk trim to trim 3' adapters and poly A tails from raw FASTQ files
-4. STAR for spliced aware alignment of RNA sequencing reads to a reference genome
+4. FastQC to obtain quality reports on trimmed fastq files
+4. STAR for spliced aware alignment of trimmed RNA sequencing reads to a reference genome
 6. SAMtools to merge and index sample BAMs
 5. RSeQC for obtaining a summary of alignment metrics from BAM files
 6. HTSeq for obtaining raw counts 
@@ -99,19 +100,26 @@ Generally, each step will involve running a make_input script first. This makes 
 
 1. Obtain quality reports with FastQC for your raw fastq files by:
       * `sh fastqc_make_input.sh cohort`. 
-      * Edit `fastqc_run_parallel.pbs` project id and compute requirements and submit the job by `qsub fastqc_run_parallel.pbs`
-            * 
+      * Editing `fastqc_run_parallel.pbs` project id and compute requirements and submitting the job by `qsub fastqc_run_parallel.pbs`
       * Description: `fastqc_make_input.sh` creates inputs for each fastq file. (1 fastq file = 1 `fastqc.sh` task). Inputs are ordered by filesize.
 2. Summarize fastQC quality reports using MultiQC by:
       * `sh multiqc.sh cohort`
-      * Description: This will run multiqc for each dataset in `..cohort.config`. 
+      * Description: This will run multiqc for each dataset in `..cohort.config`. This job only takes a couple of seconds (for cohorts with <100 samples, ~30M paired end reads) and can be run on the command line. 
+3. Trim 3' adapters and poly A tails from raw FASTQ files by:
+      * `sh bbduk_trim_make_input.sh cohort`
+      * Editing `bbduk_trim_run_parallel.pbs` project id and compute requirements and submitting the job by `qsub bbduk_trim_run_parallel.pbs`
+      * Description: This script performs trimming of raw FASTQ files for single read and/or paired read data as specified by the RUN_TYPE_SINGLE_PAIRED column in your config file. By default, scripts perform adapter trimming following recommendations under "Adapter Trimming" on the [BBDuk Guide](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/), and in addition, will perform poly A tail trimming for the entire length of the input reads.
       
 # Benchmarking metrics
 
 The below metrics were obtained for a mouse dataset with 10 samples, ~33 M reads, 150 base pair, paired end reads. 
 
-|#JobName|CPUs_requested|CPUs_used|Mem_requested|Mem_used|CPUtime|CPUtime_mins|Walltime_req|Walltime_used|Walltime_mins|JobFS_req|JobFS_used|Efficiency|Service_units(CPU_hours)|
-|--------|--------------|---------|-------------|--------|-------|------------|------------|-------------|-------------|---------|----------|----------|----------|
-|fastqc.o|	5|	5|	20.0GB|	20.0GB|	01:44:24|	104.40|	01:00:00|	00:21:30|	21.50|	100.0MB|	8.05MB|	0.97|	3.58|
+|#JobName|CPUs_requested|CPUs_used|Mem_requested|Mem_used|CPUtime|CPUtime_mins|Walltime_req|Walltime_used|Walltime_mins|JobFS_req|JobFS_used|Efficiency|Service_units(CPU_hours)|Queue|
+|--------|--------------|---------|-------------|--------|-------|------------|------------|-------------|-------------|---------|----------|----------|----------|----------|
+|fastqc.o|	5|	5|	20.0GB|	20.0GB|	01:44:24|	104.40|	01:00:00|	00:21:30|	21.50|	100.0MB|	8.05MB|	0.97|	3.58|normal|
 
+
+# Supplementary scripts
+
+* `sh multiqc_single_dataset.sh Batch_1` performs multiqc for a single sequencing batch, e.g. Batch_1, as specified by DATASET in ..<cohort>.config. Run after fastQC.
 
