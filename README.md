@@ -126,7 +126,7 @@ Generally, each step will involve running a make_input script first. This makes 
 The below metrics were obtained for a mouse dataset with 10 samples, ~33 M reads, 150 base pair, paired end reads. 
 
 |#JobName|CPUs_requested|CPUs_used|Mem_requested|Mem_used|CPUtime|CPUtime_mins|Walltime_req|Walltime_used|Walltime_mins|JobFS_req|JobFS_used|Efficiency|Service_units(CPU_hours)|Queue|NCPUS/task|
-|--------|--------------|---------|-------------|--------|-------|------------|------------|-------------|-------------|---------|----------|----------|----------|----------|----------|----------|
+|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
 |fastqc.o|	5|	5|	20.0GB|	20.0GB|	01:44:24|	104.40|	01:00:00|	00:21:30|	21.50|	100.0MB|	8.05MB|	0.97|	3.58|normal|1|
 |bbduktrim.o|	5|	5|	80.0GB|	74.0GB|	04:46:22|	286.37|	03:00:00|	01:03:02|	63.03|	100.0MB|	8.05MB|	0.91|	42.02|normal|1|
 
