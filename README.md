@@ -1,6 +1,6 @@
 # RNASeq-DE
 
-The scripts in this repository process RNA sequencing data (single, paired and/or multiplexed) for differential expression (raw FASTQ to counts) on the National Compute Infrastructure, Gadi. The scripts include:
+The scripts in this repository process RNA sequencing data (single, paired and/or multiplexed) for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. The scripts include:
 
 1. FastQC to obtain quality reports on fastq files
 2. MultiQC to summaries quality reports on fastq files
@@ -46,7 +46,7 @@ Your __RNASeq-DE__ directory structure should resemble the following:
 └── Scripts
 ```
 
-Edit the __samples.config__ file. This config file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files, so it is important that An example is provided below:
+Edit the __cohort.config__ file. This config file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files. An example is provided below:
 
 |#FASTQ|	SAMPLEID|	DATASET|	REFERENCE_GRCh38_GRCm38|	SEQUENCING_CENTRE|	PLATFORM|	RUN_TYPE_SINGLE_PAIRED|	LIBRARY|
 |------|---------|----------|------------------------|--------------------|-----------|-------------------------|--------|
@@ -54,28 +54,36 @@ Edit the __samples.config__ file. This config file is used to tell the scripts w
 |sample1_2.fastq.gz|     SAMPLEID1|       Batch_1| GRCh38|  KCCG|    ILLUMINA|        PAIRED|  1|
 |sample2.fastq.gz|	SAMPLEID2|	Batch_2|	GRCm38|	KCCG|	ILLUMINA|	SINGLE|	1|
 
-Column descriptions for __samples.config__:
+Column descriptions for __cohort.config__:
 
 |Column name| Description|
 |----|--------|
 |FASTQ| FASTQ file name. This column can be populated with `ls -1` in your sequencing batch directory|
-|SAMPLEID| The sample identifier used in your laboratory. This will be used in naming output files. No whitespace please.|
-|DATASET| The sequencing batch that the FASTQ file was generated, and the directory name where the FASTQ file is located. No whitespace please. |
-|REFERENCE_GRCh38_GRCm38| Reference subdirectory name, e.g. GRCh38 or GRCm38 in the above example. Scripts will use reference files (.fasta and .gtf) and STAR index files for the FASTQ file/sample for alignment and counting.  |
+|SAMPLEID| The sample identifier used in your laboratory. This will be used in naming output files. Avoid whitespace.|
+|DATASET| The sequencing batch that the FASTQ file was generated, and the directory name (must case match) where the FASTQ file is located. |
+|REFERENCE_GRCh38_GRCm38| Reference subdirectory name, e.g. GRCh38 or GRCm38 in the above example (must case match). Scripts will use reference files (.fasta and .gtf) and STAR index files for the FASTQ file/sample for alignment and counting.  |
 |SEQUENCING_CENTRE| e.g. KCCG. This is used in the read group header in the output BAM file for the aligned FASTQ. No whitespace please.|
 |PLATFORM| e.g. ILLUMINA. This is used in the read group header in the output BAM file for the aligned FASTQ.|
-|RUN_TYPE_SINGLE_PAIRED| Whether you want to trim, STAR align the FASTQ as single read data or paired end data.| 
+|RUN_TYPE_SINGLE_PAIRED| Input SINGLE or PAIRED. This is used to indicate whether you want to trim, STAR align the FASTQ as single read data or paired end data.| 
 |LIBRARY| The sequencing library of the FASTQ file. This is used in the read group header in the output BAM file for the aligned FASTQ. No whitespace please.|
 
 ## Software
 
-openmpi/4.0.2
+The software listed below are used in the RNASeq-DE pipeline. Some of these are installed globally on NCI Gadi (check with `module avail` for the current software). Install python3 packages by `module load python3/3.8.5`, and then using the `pip3 install` commands as listed below. These will be installed in `$HOME`. All other software need to be installed in your project's `/scratch` directory and module loadable. 
 
-nci-parallel/1.0.0
+openmpi/4.0.2 (installed globally)
 
-python3/3.8.5
+nci-parallel/1.0.0 (installed globally)
 
-SAMtools/1.10
+SAMtools/1.10 (installed globally)
+
+python3/3.8.5 (installed globally)
+
+`pip3 install multiqc`
+
+`pip3 install RSeQC`
+
+`pip3 install HTSeq`
 
 fastQC/0.11.7
 
@@ -83,9 +91,27 @@ BBDuk/37.98
 
 STAR/2.7.3a
 
-`pip3 install multiqc`
+# Running the pipeline
 
-`pip3 install RSeQC`
+Change into the Scripts directory using `cd Scripts` and run all steps below in sequence to process data for samples in `..cohort.config`. 
 
-`pip3 install HTSeq`
+Generally, each step will involve running a make_input script first. This makes inputs for the run_parallel.pbs script which is run next, once you have modified compute resource requests according to your data requirements (a guide is provided in the script and down below). The run_parallel.pbs script runs a task.sh script in parallel with the requested compute resources per job and per task, where 1 row in the input file = 1 task. 
+
+1. Obtain quality reports with FastQC for your raw fastq files by:
+      * `sh fastqc_make_input.sh cohort`. 
+      * Edit `fastqc_run_parallel.pbs` project id and compute requirements and submit the job by `qsub fastqc_run_parallel.pbs`
+            * 
+      * Description: `fastqc_make_input.sh` creates inputs for each fastq file. (1 fastq file = 1 `fastqc.sh` task). Inputs are ordered by filesize.
+2. Summarize fastQC quality reports using MultiQC by:
+      * `sh multiqc.sh cohort`
+      * Description: This will run multiqc for each dataset in `..cohort.config`. 
+      
+# Benchmarking metrics
+
+The below metrics were obtained for a mouse dataset with 10 samples, ~33 M reads, 150 base pair, paired end reads. 
+
+|#JobName|CPUs_requested|CPUs_used|Mem_requested|Mem_used|CPUtime|CPUtime_mins|Walltime_req|Walltime_used|Walltime_mins|JobFS_req|JobFS_used|Efficiency|Service_units(CPU_hours)|
+|--------|--------------|---------|-------------|--------|-------|------------|------------|-------------|-------------|---------|----------|----------|----------|
+|fastqc.o|	5|	5|	20.0GB|	20.0GB|	01:44:24|	104.40|	01:00:00|	00:21:30|	21.50|	100.0MB|	8.05MB|	0.97|	3.58|
+
 
