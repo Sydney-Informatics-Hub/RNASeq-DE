@@ -2,14 +2,16 @@
 
 The scripts in this repository process RNA sequencing data (single, paired and/or multiplexed) for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. The scripts include:
 
-1. FastQC to obtain quality reports on fastq files
-2. MultiQC to summaries quality reports on fastq files
+1. FastQC to obtain quality reports on raw fastq files
+2. MultiQC to summarize fastQC quality reports on raw fastq files
 3. BBduk trim to trim 3' adapters and poly A tails from raw FASTQ files
 4. FastQC to obtain quality reports on trimmed fastq files
-4. STAR for spliced aware alignment of trimmed RNA sequencing reads to a reference genome
-6. SAMtools to merge and index sample BAMs
-5. RSeQC for obtaining a summary of alignment metrics from BAM files
-6. HTSeq for obtaining raw counts 
+5. MultiQC to summarize fastQC quality reports on trimmed fastq files
+6. STAR indexing for a given reference genome and corresponding annotation file
+7. STAR for spliced aware alignment of trimmed RNA sequencing reads to a reference genome
+8. SAMtools to merge and index sample BAMs
+9. RSeQC for obtaining a summary of alignment metrics from BAM files
+10. HTSeq for obtaining raw counts 
 
 # Set up
 
@@ -94,29 +96,39 @@ STAR/2.7.3a
 
 # Running the pipeline
 
-Change into the Scripts directory using `cd Scripts` and run all steps below in sequence to process data for samples in `..cohort.config`. 
+Change into the Scripts directory using `cd Scripts` and run all steps below in sequence to process data for samples belonging to `dataset` in `..cohort.config`. 
 
 Generally, each step will involve running a make_input script first. This makes inputs for the run_parallel.pbs script which is run next, once you have modified compute resource requests according to your data requirements (a guide is provided in the script and down below). The run_parallel.pbs script runs a task.sh script in parallel with the requested compute resources per job and per task, where 1 row in the input file = 1 task. 
 
 1. Obtain quality reports with FastQC for your raw fastq files by:
       * `sh fastqc_make_input.sh cohort`. 
       * Editing `fastqc_run_parallel.pbs` project id and compute requirements and submitting the job by `qsub fastqc_run_parallel.pbs`
-      * Description: `fastqc_make_input.sh` creates inputs for each fastq file. (1 fastq file = 1 `fastqc.sh` task). Inputs are ordered by filesize.
-2. Summarize fastQC quality reports using MultiQC by:
+      * Description: `fastqc_make_input.sh` creates inputs for each fastq file. FastQC reports are written to `../dataset_fastQC` (1 fastq file = 1 `fastqc.sh` task). Inputs are ordered by filesize.
+2. Summarize fastQC quality reports for raw fastq files using MultiQC by:
       * `sh multiqc.sh cohort`
-      * Description: This will run multiqc for each dataset in `..cohort.config`. This job only takes a couple of seconds (for cohorts with <100 samples, ~30M paired end reads) and can be run on the command line. 
+      * Description: This will run multiqc for each raw fastq for dataset in `..cohort.config`. This job only takes a couple of seconds (for cohorts with <100 samples, ~30M paired end reads) and can be run on the command line. MultiQC reports are written to `../dataset_fastQC`. Before moving on, you should assess your multiqc output by looking at `multiqc_report.html` on a browser or checking `multiqc_data/multiqc_fastqc.txt and multiqc_data/multiqc_general_stats.txt`
 3. Trim 3' adapters and poly A tails from raw FASTQ files by:
       * `sh bbduk_trim_make_input.sh cohort`
       * Editing `bbduk_trim_run_parallel.pbs` project id and compute requirements and submitting the job by `qsub bbduk_trim_run_parallel.pbs`
-      * Description: This script performs trimming of raw FASTQ files for single read and/or paired read data as specified by the RUN_TYPE_SINGLE_PAIRED column in your config file. By default, scripts perform adapter trimming following recommendations under "Adapter Trimming" on the [BBDuk Guide](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/), and in addition, will perform poly A tail trimming for the entire length of the input reads.
+      * Description: This script performs trimming of raw FASTQ files for single read and/or paired read data as specified by the RUN_TYPE_SINGLE_PAIRED column in your config file. Trimmed FASTQs are written to `../dataset_trimmed`. By default, scripts perform adapter trimming following recommendations under "Adapter Trimming" on the [BBDuk Guide](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/), and in addition, will perform poly A tail trimming for the entire length of the input reads.
+4. Obtain quality reports with FastQC for trimmed fastq files by:
+      * `sh fastqc_trimmed_make_input.sh cohort`
+      * Editing `fastqc_trimmed_run_parallel.pbs` project id and compute requirements and submitting the job by `qsub fastqc_trimmed_run_parallel.pbs`. 
+      * Description: `fastqc_trimmed_make_input.sh` creates inputs for each trimmed fastq file in `../dataset_trimmed`. FastQC reports are written to `../dataset_fastQC_trimmed` (1 fastq file = 1 `fastqc.sh` task). Inputs are ordered by filesize.
+ 5. Summarize fastQC quality reports for trimmed fastq files using MultiQC by:
+      * `sh multiqc_trimmed.sh cohort`
+      * This will run multiqc for each trimmed fastq file for dataset in `..cohort.config`. This job only takes a couple of seconds (for cohorts with <100 samples, ~30M paired end reads) and can be run on the command line. MultiQC reports are written to `../dataset_fastQC_trimmed`. Before moving on, you should assess your multiqc output by looking at `multiqc_report.html` on a browser or checking `multiqc_data/multiqc_fastqc.txt and multiqc_data/multiqc_general_stats.txt` and compare it to quality reports for the raw FASTQ files.
+6. Index reference genome and annotation file using STAR. 
+      * Description: Indexing must be performed using the same version of STAR that will be used for the STAR mapping step
       
 # Benchmarking metrics
 
 The below metrics were obtained for a mouse dataset with 10 samples, ~33 M reads, 150 base pair, paired end reads. 
 
-|#JobName|CPUs_requested|CPUs_used|Mem_requested|Mem_used|CPUtime|CPUtime_mins|Walltime_req|Walltime_used|Walltime_mins|JobFS_req|JobFS_used|Efficiency|Service_units(CPU_hours)|Queue|
+|#JobName|CPUs_requested|CPUs_used|Mem_requested|Mem_used|CPUtime|CPUtime_mins|Walltime_req|Walltime_used|Walltime_mins|JobFS_req|JobFS_used|Efficiency|Service_units(CPU_hours)|Queue|NCPUS/task|
 |--------|--------------|---------|-------------|--------|-------|------------|------------|-------------|-------------|---------|----------|----------|----------|----------|
-|fastqc.o|	5|	5|	20.0GB|	20.0GB|	01:44:24|	104.40|	01:00:00|	00:21:30|	21.50|	100.0MB|	8.05MB|	0.97|	3.58|normal|
+|fastqc.o|	5|	5|	20.0GB|	20.0GB|	01:44:24|	104.40|	01:00:00|	00:21:30|	21.50|	100.0MB|	8.05MB|	0.97|	3.58|normal|1|
+|bbduktrim.o|	5|	5|	80.0GB|	74.0GB|	04:46:22|	286.37|	03:00:00|	01:03:02|	63.03|	100.0MB|	8.05MB|	0.91|	42.02|normal|1|
 
 
 # Supplementary scripts
