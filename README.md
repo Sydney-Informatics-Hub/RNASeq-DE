@@ -135,3 +135,10 @@ The below metrics were obtained for a mouse dataset with 10 samples, ~33 M reads
 
 * `sh multiqc_single_dataset.sh Batch_1` performs multiqc for a single sequencing batch, e.g. Batch_1, as specified by DATASET in ..<cohort>.config. Run after fastQC.
 
+# Cite us to support us!
+ 
+The RNASeq-DE pipeline can be cited as DOI: https://doi.org/10.48546/workflowhub.workflow.152.1  
+  
+If you use our pipelines, please cite us:  
+  
+Sydney Informatics Hub, Core Research Facilities, University of Sydney, 2021, The Sydney Informatics Hub Bioinformatics Repository, <date accessed>, https://github.com/Sydney-Informatics-Hub/Bioinformatics
