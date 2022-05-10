@@ -46,9 +46,10 @@ The RNASeq-DE workflow pre-processes RNA sequencing data for differential expres
 
 The scripts in this repository use relative paths and require careful setup to ensure that scripts can locate input files seamlessly. To start, go to your working directory (e.g. /scratch/ab1 for your ab1 project on NCI Gadi) and:
 
-`git clone https://github.com/Sydney-Informatics-Hub/RNASeq-DE`
-
-`cd RNASeq-DE`
+```
+git clone https://github.com/Sydney-Informatics-Hub/RNASeq-DE
+cd RNASeq-DE
+```
 
 You will then need to include:
 
