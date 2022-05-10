@@ -21,25 +21,25 @@ RNASeq-DE is a scalable workflow that pre-processes RNA sequencing data for diff
 1. __QC of raw FASTQs__: FastQC and MultiQC to obtain quality reports on raw fastq files
 2. __Trim raw FASTQs__: BBduk trim to trim 3' adapters and poly A tails. [Optional] - QC trimmed FASTQs.
 3. __Mapping__: STAR for spliced aware alignment of RNA sequencing reads (FASTQ) to a reference genome
-  * Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
-  * Perform mapping with trimmed FASTQs to prepared reference
-  * Pigz is used to gzip unmapped files
-  * Outputs: BAM per FASTQ pair (sequencing batch), unmapped reads, alignment stats
+    * Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
+    * Perform mapping with trimmed FASTQs to prepared reference
+    * Pigz is used to gzip unmapped files
+    * Outputs: BAM per FASTQ pair (sequencing batch), unmapped reads, alignment stats
 4. __Merge lane level to sample level BAMs__: SAMtools to merge and index sample BAMs
-  * Merge multiplexed BAMs into sample level BAMs. For samples which are not multiplexed, files are renamed/symlinked for consistent file naming.
-  * Outputs: `<sampleid>.final.bam` and `<sampleid>_<flowcell>.final.bam` (and index files)
+    * Merge multiplexed BAMs into sample level BAMs. For samples which are not multiplexed, files are renamed/symlinked for consistent file naming.
+    * Outputs: `<sampleid>.final.bam` and `<sampleid>_<flowcell>.final.bam` (and index files)
 5. __QC of mapping__
-  * RSeQC infer_experiment.py - check strand awareness, required for counting. Output: per sample reports which are summarized by cohort in `../QC_reports/<cohort>_final_bams_inter_experiment/<cohort>.txt`
-  * [Optional] RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR, but can be used on sample level BAMs).
-  * RSeQC read_distribution.py - checks which features reads aligned to for each sample (summarized with multiqc). Expect ~30% of reads to align to CDS exons (provides total reads, total tags, total tags assigned. Groups by: CDS exons, 5' UTR, 3' UTR, Introns, TSS up and down regions). 
-  * [Optional] `summarize_STAR_alignment_stats.pl`: collates per sample STAR metric per flowcell level BAM (use read_distribution for sample level BAMs). Uses datasets present in a cohort.config file to find these BAMs. Inputs: per sample `*Log.final.out`. Output: `../QC_reports/<cohort>_STAR_metrics.txt
-  * [Optional] SAMtools idxstats: summarize number of reads per chromosome (useful for inferring gender, probably needs a bit more work)
+    * RSeQC infer_experiment.py - check strand awareness, required for counting. Output: per sample reports which are summarized by cohort in `../QC_reports/<cohort>_final_bams_inter_experiment/<cohort>.txt`
+    * [Optional] RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR, but can be used on sample level BAMs).
+    * RSeQC read_distribution.py - checks which features reads aligned to for each sample (summarized with multiqc). Expect ~30% of reads to align to CDS exons (provides total reads, total tags, total tags assigned. Groups by: CDS exons, 5' UTR, 3' UTR, Introns, TSS up and down regions). 
+    * [Optional] `summarize_STAR_alignment_stats.pl`: collates per sample STAR metric per flowcell level BAM (use read_distribution for sample level BAMs). Uses datasets present in a cohort.config file to find these BAMs. Inputs: per sample `*Log.final.out`. Output: `../QC_reports/<cohort>_STAR_metrics.txt
+    * [Optional] SAMtools idxstats: summarize number of reads per chromosome (useful for inferring gender, probably needs a bit more work)
 6. __Raw counts__: HTSeq
-  * Count reads in `<sampleid>.final.bam` that align to features in your reference and create a count matrix for a cohort
-  * Output: `<sample>.counts` per input BAM and a count matrix as `<cohort>.counts`
+    * Count reads in `<sampleid>.final.bam` that align to features in your reference and create a count matrix for a cohort
+    * Output: `<sample>.counts` per input BAM and a count matrix as `<cohort>.counts`
 7. __Normalized counts__: BAMtools/TPMCalculator
-  * Obtain TPM normalized counts for gene and transcripts in your reference from `<sampleid>.final.bam` and create a TPM count matrix for a cohort
-  * Output: Per sample TPM counts and cohort count matricies as `TPM_TranscriptLevel.counts`, `TPM_GeneLevel.counts`
+    * Obtain TPM normalized counts for gene and transcripts in your reference from `<sampleid>.final.bam` and create a TPM count matrix for a cohort
+    * Output: Per sample TPM counts and cohort count matricies as `TPM_TranscriptLevel.counts`, `TPM_GeneLevel.counts`
 
 # User guide
 
