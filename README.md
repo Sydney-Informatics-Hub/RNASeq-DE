@@ -147,7 +147,7 @@ Once `fastqc_run_parallel.pbs` is complete, you can summarize reports using:
 sh multiqc.sh ../dataset_fastQC`
 ```
 
-2. Trim raw FASTQs
+#### 2. Trim raw FASTQs
 
 This step trims raw FASTQ files using BBDuk trim. 
 
