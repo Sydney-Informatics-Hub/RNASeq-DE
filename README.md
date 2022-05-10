@@ -17,27 +17,26 @@
 
 The RNASeq-DE workflow pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. In summary, the steps of this workflow include:
 
-0. Set up (create config file), data transfer, verify md5sums
-1. Raw FASTQ QC: FastQC and MultiQC to obtain quality reports on raw fastq files
-2. Trim raw FASTQs: BBduk trim to trim 3' adapters and poly A tails
-3. Trimmed FASTQ QC: FastQC and MultiQC to obtain quality reports on trimmed fastq files
-4. Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
-5. Mapping: STAR for spliced aware alignment of RNA sequencing reads (FASTQ) to a reference genome
+0. __Set up__
+1. __Raw FASTQ QC__: FastQC and MultiQC to obtain quality reports on raw fastq files
+2. __Trim raw FASTQs__: BBduk trim to trim 3' adapters and poly A tails
+3. __Trimmed FASTQ QC__: FastQC and MultiQC to obtain quality reports on trimmed fastq files
+4. __Mapping__: STAR for spliced aware alignment of RNA sequencing reads (FASTQ) to a reference genome
+   * Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
    * Outputs include: BAM per sample at batch level, unmapped reads (as paired reads), alignment stats
    * Pigz is used to gzip unmapped files
-6. Merging: SAMtools to merge and index sample BAMs
+5. __Merge lane level to sample level BAMs__: SAMtools to merge and index sample BAMs
    * Outputs: <sample>.final.bam and <sample>_<flowcell>.final.bam (and index files)
    * This step is particularly for mergining multiplexed samples. For most samples which are not multiplexed, files are simply renamed/symlinked to original STAR bams. 
-   * Note, steps 7 - 9 can be run in parallel.
-7. Collect BAM QC metrics
+6. __Collect BAM QC metrics__
      * RSeQC infer_experiment.py - check strand awareness, required for counting. Output: per sample reports which are summarized by cohort in `../QC_reports/<cohort>_final_bams_inter_experiment/<cohort>.txt`
      * RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR).
      * RSeQC read_distribution.py - checks which features reads aligned to for each sample (summarized with multiqc). Expect ~30% of reads to align to CDS exons (provides total reads, total tags, total tags assigned. Groups by: CDS exons, 5' UTR, 3' UTR, Introns, TSS up and down regions). 
     * `summarize_STAR_alignment_stats.pl`: collates per sample STAR metric per flowcell level BAM (use read_distribution for sample level BAMs). Uses datasets present in a cohort.config file to find these BAMs. Inputs: per sample `*Log.final.out`. Output: `../QC_reports/<cohort>_STAR_metrics.txt
    * SAMtools idxstats: summarize number of reads per chromosome (useful for inferring gender, probably needs a bit more work)
-8. Raw counts: HTSeq
+7. __Raw counts__: HTSeq
      * `htseq-count_custom_make_input.sh` to include sample level and sample_flowcell level BAMs
-9. TPM normalized counts: BAMtools/TPMCalculator is used to obtain gene and transcript level TPM normalized counts
+8. __Normalized counts__: BAMtools/TPMCalculator is used to obtain gene and transcript level TPM normalized counts
      * Runs TPMcalculator for all BAMs in directory ${bamdir} (therefore will include flowcell level TPMs)
      * `tpmcalculator_make_matrix.pl` creates sample-gene TPM matrix file using TPM values (col 7) in sample "final_genes.out". These are gene level TPMs.
 
