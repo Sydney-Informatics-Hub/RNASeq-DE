@@ -212,7 +212,6 @@ The below metrics were obtained for a human cohort comprised of:
 | star_align_trimmed_unmapped_out.o     | 240            | 240       | 950.0GB       | 736.62GB | 42:09:54   | 2529.9       | 24:00:00     | 0:21:28       | 21.47         | 500.0MB   | 8.17MB     | 0.49       | 171.73                   | 0               | 22/02/2022 | 15:59:35 |
 | tpmcalculator_transcript.o            | 768            | 768       | 2.97TB        | 2.63TB   | 978:52:39  | 58732.65     | 10:00:00     | 5:14:53       | 314.88        | 1.56GB    | 8.38MB     | 0.24       | 8061.01                  | 0               | 23/02/2022 | 14:31:26 |
 | tpmtranscript_matrix.o                | 1              | 1         | 96.0GB        | 53.19GB  | 0:37:32    | 37.53        | 5:00:00      | 0:45:33       | 45.55         | 100.0MB   | 0B         | 0.82       | 109.32                   | 0               | 24/02/2022 | 13:54:22 |
-```
 
 # Workflow summaries
 
