@@ -21,28 +21,30 @@ set -e
 #
 #########################################################
 
-# Quite variable depending on BAM size
-# Future - run each BAM as an independant job
-# Could also try order inputs by BAM size (descending)
+# RSeQC's read_distribution.py to collect a summary of stats on a BAM file.
+# See http://rseqc.sourceforge.net/
+# Job resource requirements:
+# Benchmark for 260 BAM files, ~80M reads per sample:
+# JobName        CPUs_requested  CPUs_used       Mem_requested   Mem_used        CPUtime CPUtime_mins    Walltime_req    Walltime_used   Walltime_mins   JobFS_req        JobFS_used      Efficiency      Service_units(CPU_hours)        Job_exit_status
+# read_distribution.o     56      56      256.0GB 175.35GB        89:44:14        5384.23 02:00:00        01:50:20        110.33  200.0MB 8.16MB  0.87    128.72   0
 
 #PBS -P <project>
-#PBS -N htseq-count
-#PBS -l walltime=30:00:00,ncpus=240,mem=950GB,wd
+#PBS -N read_distribution
+#PBS -l walltime=10:00:00,ncpus=144,mem=570GB,wd
 #PBS -q normal
 #PBS -W umask=022
 #PBS -l storage=scratch/<project>
-#PBS -o ./Logs/htseq-count.o
-#PBS -e ./Logs/htseq-count.e
+#PBS -o ./Logs/read_distribution.o
+#PBS -e ./Logs/read_distribution.e
 
 module load openmpi/4.0.2
 module load nci-parallel/1.0.0a
-module load python3/3.8.5
-export PYTHONPATH=$HOME/.local/lib/python3.8/site-packages
+module load python3/3.9.2
 
 mkdir -p ./Logs
 NCPUS=1
-SCRIPT=./htseq-count.sh
-INPUTS=./Inputs/htseq-count.inputs
+SCRIPT=./read_distribution.sh
+INPUTS=./Inputs/read_distribution.inputs
 
 #########################################################
 # Do not edit below this line
@@ -57,3 +59,4 @@ mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
         nci-parallel \
         --verbose \
         --input-file ${PBS_JOBFS}/input-file
+

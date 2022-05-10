@@ -21,31 +21,34 @@ set -e
 #
 #########################################################
 
-# Only ${sampleid}.final.bam are included
+# Only ../${cohort}_final_bams/${sampleid}.final.bam are included
+# using sampleids (column 2) from your cohort.config file
 
 if [ -z "$1" ]
 then
-        echo "Please run this script your config file, e.g. sh htseq-count_make_input.sh ../cohort.config"
-        exit
+	echo "Please provide the path to your <cohort>.config file, e.g. sh read_distribution_make_input.sh cohort.config"
+	exit
 fi
 
 config=$1
 cohort=$(basename $config | cut -d'.' -f1)
-logdir=./Logs/htseq-count
-strand=reverse
+logdir=./Logs/read_distribution
 INPUTS=./Inputs
-input_file=${INPUTS}/htseq-count.inputs
+input_file=${INPUTS}/read_distribution.inputs
+bamdir=../${cohort}_final_bams
+outdir=../${cohort}_read_distribution
 
-mkdir -p ${INPUTS} ${logdir}
+mkdir -p ${INPUTS} ${outdir} ${logdir}
 rm -rf ${input_file}
 
 tasks=()
 while read -r fastq sampleid dataset reference seqcentre platform run_type library; do
 	if [[ ! ${fastq} =~ ^#.*$ ]]; then
-		bam=../${cohort}_final_bams/${sampleid}.final.bam
-		gtf=`ls ../Reference/${reference}/*${reference}*gtf`
+		bam=${bamdir}/${sampleid}.final.bam
+		bed=$(ls ../Reference/${reference}/*${reference}*.bed)
 		logfile=${logdir}/${sampleid}.log
-		tasks+=("${sampleid},${bam},${cohort},${gtf},${strand},${logfile},${NCPUS}")
+		out=${outdir}/${sampleid}_read_distribution.txt
+		tasks+=("${sampleid},${bam},${bed},${logfile},${out}")
 	fi
 done < "${config}"
 

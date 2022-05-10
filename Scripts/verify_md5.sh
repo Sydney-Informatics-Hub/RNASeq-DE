@@ -21,36 +21,10 @@ set -e
 #
 #########################################################
 
-module load bbtools/37.98
+dataset=$1
+shift
+checksum="$@"
+out=verify_gadi_checksums.txt
 
-fastq1=`echo $1 | cut -d ',' -f 1`
-fastq2=`echo $1 | cut -d ',' -f 2`
-out1=`echo $1 | cut -d ',' -f 3`
-out2=`echo $1 | cut -d ',' -f 4`
-readlen=`echo $1 | cut -d ',' -f 5`
-logdir=`echo $1 | cut -d ',' -f 6`
-adapters=`echo $1 | cut -d ',' -f 7`
-NCPUS=`echo $1 | cut -d ',' -f 8`
-
-basename=$(basename "$fastq1" | cut -d. -f1)
-uniq_basename="${basename::-1}"
-logfile=${logdir}/${uniq_basename}trimming.log
-
-rm -rf ${logfile}
-
-bbduk.sh -Xmx6g \
-	threads=${NCPUS} \
-	in=${fastq1} \
-	in2=${fastq2} \
-	out=${out1} \
-	out2=${out2} \
-	ref=${adapters} \
-	ktrim=r \
-	k=23 \
-	mink=11 \
-	hdist=1 \
-	tpe \
-	tbo \
-	overwrite=true \
-	trimpolya=${readlen} >> ${logfile} 2>&1
-
+cd ../$dataset
+echo $checksum | md5sum -c >> $out

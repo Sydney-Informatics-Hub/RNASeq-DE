@@ -21,34 +21,46 @@ set -e
 #
 #########################################################
 
-# Quite variable depending on BAM size
-# Future - run each BAM as an independant job
-# Could also try order inputs by BAM size (descending)
+# DESCRIPTION
+# Using sample ID, find all STAR BAMs available and create final BAMs
+# For multiplexed samples:
+# Merge flowcell level bams to sample level bams
+# Retain flowcell level bams (to check technical batch effects)
+# For non-multiplexed samples:
+# Create symlink and rename STAR bams to <sample>.final.bam
+# All bams are coordinate sorted and indexed
+
+# COMPUTE
+# Majority of samples are probably not multiplexed. These only need 1 CPU
+# samtools does improve with multiple threads for multiplexed samples. 
+# Future: Run samples separately, although not too bad now
+# ~882 samples including ~10 multiplexed, use
+# #PBS -l walltime=05:00:00,ncpus=48,mem=190GB,wd
+# USE NCPU=3 IN NEXT RUN
 
 #PBS -P <project>
-#PBS -N htseq-count
-#PBS -l walltime=30:00:00,ncpus=240,mem=950GB,wd
+#PBS -N samtools_merge_index
+#PBS -l walltime=10:00:00,ncpus=48,mem=190GB,wd
 #PBS -q normal
 #PBS -W umask=022
 #PBS -l storage=scratch/<project>
-#PBS -o ./Logs/htseq-count.o
-#PBS -e ./Logs/htseq-count.e
+#PBS -o ./Logs/samtools_merge_index.o
+#PBS -e ./Logs/samtools_merge_index.e
 
 module load openmpi/4.0.2
 module load nci-parallel/1.0.0a
-module load python3/3.8.5
-export PYTHONPATH=$HOME/.local/lib/python3.8/site-packages
+module load samtools/1.10
 
 mkdir -p ./Logs
-NCPUS=1
-SCRIPT=./htseq-count.sh
-INPUTS=./Inputs/htseq-count.inputs
+NCPUS=3
+SCRIPT=./samtools_merge_index.sh
+INPUTS=./Inputs/samtools_merge_index.inputs
 
 #########################################################
 # Do not edit below this line
 #########################################################
 
-M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) 
 
 sed "s|^|${SCRIPT} |" ${INPUTS} > ${PBS_JOBFS}/input-file
 

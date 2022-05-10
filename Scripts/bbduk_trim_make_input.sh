@@ -1,25 +1,42 @@
 #! /bin/bash
 
-# Create input file run gatk4 HaplotypeCaller in parallel
-# Run before gatk4_hc_run_parallel.pbs
+set -e
 
+#########################################################
+#
+# Platform: NCI Gadi HPC
+#
+# Author: Tracy Chew
+# tracy.chew@sydney.edu.au
+#
+# If you use this script towards a publication, please acknowledge the
+# Sydney Informatics Hub (or co-authorship, where appropriate).
+#
+# Suggested acknowledgement:
+# The authors acknowledge the scientific and technical assistance
+# <or e.g. bioinformatics assistance of <PERSON>> of Sydney Informatics
+# Hub and resources and services from the National Computational
+# Infrastructure (NCI), which is supported by the Australian Government
+# with access facilitated by the University of Sydney.
+#
+#########################################################
+
+# Create inputs for bbduk_trim_run_parallel.pbs
+# Will create separate input for single or paired reads (indicated in config file)
 # Use bbtools provided list of adapters
-
-module load bbtools/37.98
 
 if [ -z "$1" ]
 then
-	echo "Please run this script with the base name of your config file, e.g. sh bbduk_trim_make_input.sh samples"
-	exit
+        echo "Please provide the path to your config file, e.g. sh bbduk_trim_make_input.sh ../samples.config"
+        exit
 fi
 
-cohort=$1
-config=../$cohort.config
+config=$1
+cohort=$(basename "$config" | cut -d'.' -f 1)
 logs=./Logs/bbduk_trim
 INPUTS=./Inputs
 single=${INPUTS}/bbduk_trim_single.inputs
 paired=${INPUTS}/bbduk_trim_paired.inputs
-NCPUS=1
 
 # set nocasematch option
 shopt -s nocasematch
@@ -51,7 +68,7 @@ while read -r fastq sampleid dataset reference seqcentre platform run_type libra
 		singles+=(${fastq})
 		
 
-		echo "../${dataset}/$fastq,$out,$readlen,${logs},${adapters},${NCPUS}" >> ${single}
+		echo "../${dataset}/$fastq,$out,$readlen,${logs},${adapters}" >> ${single}
 		
 	# PAIRED data
 	elif [[ ! ${fastq} =~ ^#.*$ && ${run_type} =~ PAIRED ]]; then
@@ -71,7 +88,7 @@ while read -r fastq sampleid dataset reference seqcentre platform run_type libra
 			out2=${outdir}/${uniq_basename}2_trimmed.${paired_extension}
 			seq=`zcat "../${dataset}/${fastq1}" | sed -n '2{p;q;}'`
 			readlen=${#seq}
-			echo "${fastq1},${fastq2},${out1},${out2},${readlen},${logs},${adapters},${NCPUS}" >> ${paired}
+			echo "${fastq1},${fastq2},${out1},${out2},${readlen},${logs},${adapters}" >> ${paired}
 				
 		fi
 		pairs+=(${uniq_basename})
@@ -92,6 +109,3 @@ then
 	echo "$(date): Found "${#uniq_pairs[@]}" pairs in ${cohort}.config"
 	echo "$(date): Saving paired data input file for bbduk trimming to ${paired}"
 fi
-
-
-

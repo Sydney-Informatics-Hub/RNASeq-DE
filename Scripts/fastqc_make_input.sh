@@ -1,16 +1,13 @@
 #! /bin/bash
 
+set -e
+
 #########################################################
 #
 # Platform: NCI Gadi HPC
-# Description: Creates input file for fastqc_run_parallel.pbs
-#  for all samples in <cohort>.config
-# Files are processed from largest to smallest for optimum E.
-# Usage: Create <cohort>.config file using template.
-# sh fastqc_make_input.sh <cohort>
+#
 # Author: Tracy Chew
 # tracy.chew@sydney.edu.au
-# Date last modified: 27/08/2020
 #
 # If you use this script towards a publication, please acknowledge the
 # Sydney Informatics Hub (or co-authorship, where appropriate).
@@ -22,16 +19,22 @@
 # Infrastructure (NCI), which is supported by the Australian Government
 # with access facilitated by the University of Sydney.
 #
-########################################################
+#########################################################
+
+# Description: Creates input file for fastqc_run_parallel.pbs
+# for all fastq files in <cohort>.config
+# Files are processed from largest to smallest for optimum E.
+# Usage: Create <cohort>.config file using template.
+# sh fastqc_make_input.sh <cohort>
 
 if [ -z "$1" ]
 then
-	echo "Please run this script with the base name of your config file, e.g. sh bbduk_trim_make_input.sh samples"
+	echo "Please run this script with the path to your config file, e.g. sh fastqc_make_input.sh cohort.config"
 	exit
 fi
 
-cohort=$1
-config=../$cohort.config
+config=$1
+cohort=$(basename "$config" | cut -d'.' -f 1)
 logs=./Logs/fastQC
 INPUTS=./Inputs
 unsorted=${INPUTS}/fastqc.inputs_unsorted
@@ -48,7 +51,7 @@ while read -r fastq sampleid dataset reference seqcentre platform run_type libra
 		basename=$(basename "$fastq" | cut -d. -f1)
 		in=../${dataset}/${fastq}
 		logdir=${logs}/${cohort}/${dataset}
-		logfile=${logdir}/${basename}.oe
+		logfile=${logdir}/${basename}.log
 		out=../${dataset}\_fastQC
 		bytes=$(ls -s "${in}" | awk '{print $1}')
 
@@ -63,4 +66,4 @@ done < "${config}"
 sort -rnk 5 -t ',' ${unsorted} > ${input_file}
 rm -rf ${unsorted}
 
-echo "Number of tasks for fastqc_run_parallel.pbs: $(wc -l ${input_file} | awk '{print $1}')"
+echo "Number of tasks: $(wc -l ${input_file} | awk '{print $1}')"

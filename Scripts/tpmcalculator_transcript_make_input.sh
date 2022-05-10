@@ -21,36 +21,32 @@ set -e
 #
 #########################################################
 
-# Only ${sampleid}.final.bam are included
-
 if [ -z "$1" ]
 then
-        echo "Please run this script your config file, e.g. sh htseq-count_make_input.sh ../cohort.config"
-        exit
+	echo "Please run this script with the path to your cohort.config file, e.g. sh tpmcalculator_transcript_make_input.sh cohort.config"
+	exit
 fi
 
 config=$1
 cohort=$(basename $config | cut -d'.' -f1)
-logdir=./Logs/htseq-count
-strand=reverse
+logdir=../Scripts/Logs/TPMCalculator_transcript
+gtf=../Reference/GRCh38/Homo_sapiens.GRCh38.103.gtf
 INPUTS=./Inputs
-input_file=${INPUTS}/htseq-count.inputs
+input_file=${INPUTS}/tpmcalculator_transcript.inputs
+bamdir=../${cohort}_final_bams
+outdir=../${cohort}_TPMCalculator_transcript
 
-mkdir -p ${INPUTS} ${logdir}
+mkdir -p ${INPUTS} ${logdir} ${outdir}
+
 rm -rf ${input_file}
 
-tasks=()
-while read -r fastq sampleid dataset reference seqcentre platform run_type library; do
-	if [[ ! ${fastq} =~ ^#.*$ ]]; then
-		bam=../${cohort}_final_bams/${sampleid}.final.bam
-		gtf=`ls ../Reference/${reference}/*${reference}*gtf`
-		logfile=${logdir}/${sampleid}.log
-		tasks+=("${sampleid},${bam},${cohort},${gtf},${strand},${logfile},${NCPUS}")
-	fi
-done < "${config}"
-
-unique=($(echo "${tasks[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-printf '%s\n' "${unique[@]}" > ${input_file}
+bams+=( $(ls $bamdir/*bam) )
+for bam in "${bams[@]}"
+do
+	sampleid=$(basename $bam | cut -d'.' -f1)
+	logfile=${logdir}/${sampleid}.log
+	echo "${sampleid},${bam},${gtf},${logfile},${outdir}" >> ${input_file}
+done
 
 num_tasks=`wc -l ${input_file}| cut -d' ' -f 1`
 echo "Number of tasks: ${num_tasks}"

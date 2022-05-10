@@ -1,0 +1,85 @@
+#!/bin/bash
+
+set -e
+
+#########################################################
+#
+# Platform: NCI Gadi HPC
+#
+# Author: Tracy Chew
+# tracy.chew@sydney.edu.au
+#
+# If you use this script towards a publication, please acknowledge the
+# Sydney Informatics Hub (or co-authorship, where appropriate).
+#
+# Suggested acknowledgement:
+# The authors acknowledge the scientific and technical assistance
+# <or e.g. bioinformatics assistance of <PERSON>> of Sydney Informatics
+# Hub and resources and services from the National Computational
+# Infrastructure (NCI), which is supported by the Australian Government
+# with access facilitated by the University of Sydney.
+#
+#########################################################
+
+# Run star_align_trimmed_make_input.sh first
+# align RNA seq fastq files using STAR
+# 24 CPUs, 96Gb memory required per human/mouse sample
+# For 96 paired FASTQs, 120 - 150M Seqs per pair
+#  -l walltime=01:00:00,ncpus=768,mem=3040GB,wd
+# can map paired and single reads in a single job
+# Should scale to the number of reads in FASTQ file
+
+#PBS -P <project>
+#PBS -N star_align_trimmed_with_unmapped
+#PBS -l walltime=24:00:00,ncpus=240,mem=950GB,wd
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l storage=scratch/<project>
+#PBS -o ./Logs/star_align_trimmed_unmapped_out.o
+#PBS -e ./Logs/star_align_trimmed_unmapped_out.e
+
+module load openmpi/4.0.2
+module load nci-parallel/1.0.0a
+module load star/2.7.3a
+
+mkdir -p ./Logs
+
+# M = Number of tasks per node
+# NCPUs = CPUs per task
+NCPUS=24
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS ))
+
+INPUTS=./Inputs
+paired=${INPUTS}/star_align_paired.inputs
+single=${INPUTS}/star_align_single.inputs
+
+PAIRED_SCRIPT=./star_align_paired_with_unmapped.sh
+SINGLE_SCRIPT=./star_align_single_with_unmapped.sh
+
+#########################################################
+# Do not edit below this line
+#########################################################
+
+if [ -s ${paired} ]
+then
+	echo "$(date): Found inputs file for paired data. Performing alignment with STAR for paired data."
+	SCRIPT=${PAIRED_SCRIPT}
+	sed "s|^|${SCRIPT} |" ${paired} > ${PBS_JOBFS}/input-file-paired
+	mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+		--map-by node:PE=${NCPUS} \
+		nci-parallel \
+		--verbose \
+		--input-file ${PBS_JOBFS}/input-file-paired
+fi
+
+if [ -s ${single} ]
+then
+	echo "$(date): Found inputs file for single data. Performing alignment with STAR for single read data."
+	SCRIPT=${SINGLE_SCRIPT}
+	sed "s|^|${SCRIPT} |" ${single} > ${PBS_JOBFS}/input-file-single
+        mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
+                --map-by node:PE=${NCPUS} \
+                nci-parallel \
+                --verbose \
+                --input-file ${PBS_JOBFS}/input-file-single
+fi

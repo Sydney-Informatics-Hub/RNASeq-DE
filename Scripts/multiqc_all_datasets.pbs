@@ -1,11 +1,15 @@
 #! /bin/bash
 
+set -e
+
 #########################################################
 #
 # Platform: NCI Gadi HPC
-# Description: Run multiQC after running fastqc_run_parallel.pbs
-# for <cohort>.config
-# Usage: sh multiqc_all_datasets <cohort> 
+# Description: Creates input file for fastqc_run_parallel.pbs
+#  for all samples in <cohort>.config
+# Files are processed from largest to smallest for optimum E.
+# Usage: Create <cohort>.config file using template.
+# sh fastqc_make_input.sh <cohort>
 # Author: Tracy Chew
 # tracy.chew@sydney.edu.au
 # Date last modified: 27/08/2020
@@ -20,24 +24,36 @@
 # Infrastructure (NCI), which is supported by the Australian Government
 # with access facilitated by the University of Sydney.
 #
-#########################################################
+########################################################
 
-module load python2
+# Description: Obtain multiQC report
+# from an analysis directory
+# Change input variables below
 
-if [ -z "$1" ]
-then
-	echo "Please run this script with the base name of your config file, e.g. sh bbduk_trim_make_input.sh samples"
-	exit
-fi
+#PBS -P <project>
+#PBS -N multiqc
+#PBS -l walltime=05:00:00,ncpus=1,mem=32GB,wd
+#PBS -q express
+#PBS -W umask=022
+#PBS -l storage=scratch/<project>
+#PBS -o ./Logs/multiqc_all_datasets.o
+#PBS -e ./Logs/multiqc_all_datasets.e
 
-cohort=$1
-config=../$cohort.config
+module load multiqc/1.9
+
+# CHANGE VARIABLES
+config=../Sample_configs/PREDICT-19_FEB22_FULL.config
+analysis=trimmed_fastQC
+
+mkdir -p ${outdir}
+cohort=$(basename "$config" | cut -d'.' -f 1)
+outdir=../QC_reports/${cohort}_${analysis}
 
 # Get all unique datasets
 while read -r fastq sampleid dataset reference seqcentre platform run_type library; do
 	if [[ ! ${fastq} =~ ^#.*$ ]]; then
-		fastqc=../${dataset}_fastQC
-		datasets+=(${fastqc})	
+		dir=../${dataset}_${analysis}
+		datasets+=(${dir})	
 	fi
 done < "${config}"
 
@@ -46,7 +62,4 @@ uniq_datasets=($(echo "${datasets[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
 echo "$(date): Performing multiqc for ${#uniq_datasets[@]} datasets: "${uniq_datasets[@]}""
 
-for dataset in "${uniq_datasets[@]}"; do
-	echo "$(date): MultiQC is running for ${dataset}..."
-	multiqc --interactive ${dataset} -o ${dataset}
-done
+multiqc --interactive ${uniq_datasets[@]} -o ${outdir}

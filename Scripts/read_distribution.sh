@@ -21,25 +21,15 @@ set -e
 #
 #########################################################
 
+module load python3/3.9.2
+export PYTHONPATH=$HOME/.local/lib/python3.9/site-packages
+
 sampleid=`echo $1 | cut -d ',' -f 1`
 bam=`echo $1 | cut -d ',' -f 2`
-cohort=`echo $1 | cut -d ',' -f 3`
-gtf=`echo $1 | cut -d ',' -f 4`
-strand=`echo $1 | cut -d ',' -f 5`
-logfile=`echo $1 | cut -d ',' -f 6`
-NCPUS=`echo $1 | cut -d ',' -f 7`
+bed=`echo $1 | cut -d ',' -f 3`
+logfile=`echo $1 | cut -d ',' -f 4`
+out=`echo $1 | cut -d ',' -f 5`
 
-module load python3/3.8.5
-export PYTHONPATH=$HOME/.local/lib/python3.8/site-packages
+echo "$(date): Running RSeQC's read_distribution.py. Sample ID:${sampleid}, BAM:${bam}, BED:${bed}, Log file:${logfile}, Out:${out}" > ${logfile} 2>&1
 
-echo $PYTHONPATH
-
-outdir=../${cohort}_htseq-count
-out=${outdir}/${sampleid}.counts
-
-mkdir -p ${outdir}
-rm -rf ${logfile}
-
-echo "$(date): Running htseq-count to obtain raw counts. Sample ID:${sampleid}, BAM:${bam}, Cohort:${cohort}, Reference:${gtf}, Strand:${strand}, Output:${out}, Log file:${logfile}, NCPUS:${NCPUS}" >> ${logfile} 2>&1 
-
-$HOME/.local/bin/htseq-count -f bam -r pos --mode=union -s ${strand} ${bam} ${gtf} > ${out}
+$HOME/.local/bin/read_distribution.py -i ${bam} -r ${bed} > ${out} 2>>${logfile}

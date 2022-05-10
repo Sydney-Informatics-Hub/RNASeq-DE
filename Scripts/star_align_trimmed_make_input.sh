@@ -1,5 +1,26 @@
 #!/bin/bash
 
+set -e
+
+#########################################################
+#
+# Platform: NCI Gadi HPC
+#
+# Author: Tracy Chew
+# tracy.chew@sydney.edu.au
+#
+# If you use this script towards a publication, please acknowledge the
+# Sydney Informatics Hub (or co-authorship, where appropriate).
+#
+# Suggested acknowledgement:
+# The authors acknowledge the scientific and technical assistance
+# <or e.g. bioinformatics assistance of <PERSON>> of Sydney Informatics
+# Hub and resources and services from the National Computational
+# Infrastructure (NCI), which is supported by the Australian Government
+# with access facilitated by the University of Sydney.
+#
+#########################################################
+
 # Inputs required by star single: reference, sampleid, fastq, out
 # Inputs requred by star paired: reference, sampleid, fastq1, fastq2, out
 # Assumes trimming was performed with bbduk_trim_run_parallel.pbs
@@ -7,12 +28,12 @@
 
 if [ -z "$1" ]
 then
-	echo "Please run this script with the base name of your config file, e.g. sh star_align_trimmed_make_input.sh samples"
-	exit
+        echo "Please provide the path to your config file, e.g. sh star_align_trimmed_make_input.sh ../samples.config"
+        exit
 fi
 
-cohort=$1
-config=../$cohort.config
+config=$1
+cohort=$(basename "$config" | cut -d'.' -f 1)
 INPUTS=./Inputs
 single=${INPUTS}/star_align_single.inputs
 paired=${INPUTS}/star_align_paired.inputs
@@ -20,9 +41,6 @@ unsort_single=${INPUTS}/star_single_unsort.inputs
 unsort_paired=${INPUTS}/star_paired_unsort.inputs
 singletmp=${INPUTS}/star_single.tmp
 pairedtmp=${INPUTS}/star_paired.tmp
-NCPUS=12	
-# 24 CPUs allows 96 Gb mem on Gadi normal nodes
-# 4 CPUs allows 125Gb mem on Gadi hugemem nodes
 
 mkdir -p ${INPUTS}
 
@@ -55,15 +73,11 @@ while read -r fastq sampleid dataset reference seqcentre pl run_type library; do
 		fastq1=${indir}/${basename}_trimmed.${single_extension}
 		
 		# Get flowcell and lane from fastq, assuming typical Illumina naming convention (Illumina pipelines 1.4 onwards)
-		#flowcell=$(zcat ${fastq1} | head -1 | cut -d ':' -f 3)
-		#lane=$(zcat ${fastq1} | head -1 | cut -d ':' -f 4)
-
-		# UBC sequenced samples have weird convention...there is no flowcell ID
-		flowcell=NA
-                lane=$(zcat ${fastq1} | head -1 | cut -d ':' -f 2)
+		flowcell=$(zcat ${fastq1} | head -1 | cut -d ':' -f 3)
+		lane=$(zcat ${fastq1} | head -1 | cut -d ':' -f 4)
 
 		# Log file to save to
-		logfile=${logdir}/${sampleid}_${lane}.oe
+		logfile=${logdir}/${sampleid}_${lane}.log
 				
 		echo "${basename},${dataset},${sampleid},${fastq1},${ref},${seqcentre},${platform},${library},${lane},${flowcell},${outdir},${logfile},${NCPUS}" >> ${unsort_single}
 		
@@ -95,7 +109,7 @@ while read -r fastq sampleid dataset reference seqcentre pl run_type library; do
 			lane=$(zcat ${fastq1} | head -1 | cut -d ':' -f 4)
 			
 			# Log file to save to
-			logfile=${logdir}/${sampleid}_${lane}.oe
+			logfile=${logdir}/${sampleid}_${lane}.log
 			
 			echo "${basename},${dataset},${sampleid},${fastq1},${fastq2},${ref},${seqcentre},${platform},${library},${lane},${flowcell},${outdir},${logfile},${NCPUS}" >> ${unsort_paired}
 			num_paired+=("${sampleid}")

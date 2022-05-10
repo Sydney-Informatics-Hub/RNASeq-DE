@@ -21,28 +21,23 @@ set -e
 #
 #########################################################
 
-# Quite variable depending on BAM size
-# Future - run each BAM as an independant job
-# Could also try order inputs by BAM size (descending)
-
 #PBS -P <project>
-#PBS -N htseq-count
-#PBS -l walltime=30:00:00,ncpus=240,mem=950GB,wd
-#PBS -q normal
+#PBS -N verify_md5
+#PBS -l walltime=02:00:00,ncpus=56,mem=256GB,wd
+#PBS -q normalbw
 #PBS -W umask=022
 #PBS -l storage=scratch/<project>
-#PBS -o ./Logs/htseq-count.o
-#PBS -e ./Logs/htseq-count.e
+#PBS -o ./Logs/verify_md5.o
+#PBS -e ./Logs/verify_md5.e
 
 module load openmpi/4.0.2
 module load nci-parallel/1.0.0a
-module load python3/3.8.5
-export PYTHONPATH=$HOME/.local/lib/python3.8/site-packages
 
 mkdir -p ./Logs
+
 NCPUS=1
-SCRIPT=./htseq-count.sh
-INPUTS=./Inputs/htseq-count.inputs
+SCRIPT=./verify_md5.sh
+INPUTS=./Inputs/verify_md5.inputs
 
 #########################################################
 # Do not edit below this line

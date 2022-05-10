@@ -21,36 +21,34 @@ set -e
 #
 #########################################################
 
-# Only ${sampleid}.final.bam are included
+# Custom - multiplexed sample BAMs were retained
 
 if [ -z "$1" ]
 then
-        echo "Please run this script your config file, e.g. sh htseq-count_make_input.sh ../cohort.config"
-        exit
+	echo "Please provide your config file, e.g. sh bam_stat_make_input.sh /path/to/cohort.config"
+	exit
 fi
 
 config=$1
 cohort=$(basename $config | cut -d'.' -f1)
-logdir=./Logs/htseq-count
-strand=reverse
+logdir=./Logs/bam_stat
 INPUTS=./Inputs
-input_file=${INPUTS}/htseq-count.inputs
+input_file=${INPUTS}/bam_stat.inputs
+bamdir=../${cohort}_final_bams
+outdir=../QC_reports/${cohort}_final_bams_bam_stat
 
-mkdir -p ${INPUTS} ${logdir}
+mkdir -p ${INPUTS} ${logdir} ${outdir}
+
 rm -rf ${input_file}
 
-tasks=()
-while read -r fastq sampleid dataset reference seqcentre platform run_type library; do
-	if [[ ! ${fastq} =~ ^#.*$ ]]; then
-		bam=../${cohort}_final_bams/${sampleid}.final.bam
-		gtf=`ls ../Reference/${reference}/*${reference}*gtf`
-		logfile=${logdir}/${sampleid}.log
-		tasks+=("${sampleid},${bam},${cohort},${gtf},${strand},${logfile},${NCPUS}")
-	fi
-done < "${config}"
-
-unique=($(echo "${tasks[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-printf '%s\n' "${unique[@]}" > ${input_file}
+bams+=( $(ls $bamdir/*bam) )
+for bam in "${bams[@]}"
+do
+	sampleid=$(basename $bam | cut -d'.' -f1)
+	logfile=${logdir}/${sampleid}.log
+	out=${outdir}/${sampleid}_bam_stat.txt
+	echo "${sampleid},${bam},${logfile},${out}" >> ${input_file}
+done
 
 num_tasks=`wc -l ${input_file}| cut -d' ' -f 1`
 echo "Number of tasks: ${num_tasks}"

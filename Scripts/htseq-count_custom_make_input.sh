@@ -21,18 +21,19 @@ set -e
 #
 #########################################################
 
-# Only ${sampleid}.final.bam are included
+# All bams here are included ../${cohort}_final_bams/*final.bam 
 
 if [ -z "$1" ]
 then
-        echo "Please run this script your config file, e.g. sh htseq-count_make_input.sh ../cohort.config"
-        exit
+	echo "Please run this script your config file, e.g. sh htseq-count_custom_make_input.sh ../cohort.config"
+	exit
 fi
 
 config=$1
 cohort=$(basename $config | cut -d'.' -f1)
 logdir=./Logs/htseq-count
 strand=reverse
+gtf=$(ls ../Reference/GRCh38/*gtf)
 INPUTS=./Inputs
 input_file=${INPUTS}/htseq-count.inputs
 
@@ -40,17 +41,14 @@ mkdir -p ${INPUTS} ${logdir}
 rm -rf ${input_file}
 
 tasks=()
-while read -r fastq sampleid dataset reference seqcentre platform run_type library; do
-	if [[ ! ${fastq} =~ ^#.*$ ]]; then
-		bam=../${cohort}_final_bams/${sampleid}.final.bam
-		gtf=`ls ../Reference/${reference}/*${reference}*gtf`
-		logfile=${logdir}/${sampleid}.log
-		tasks+=("${sampleid},${bam},${cohort},${gtf},${strand},${logfile},${NCPUS}")
-	fi
-done < "${config}"
+bams+=( $(ls ../${cohort}_final_bams/*final.bam) )
 
-unique=($(echo "${tasks[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-printf '%s\n' "${unique[@]}" > ${input_file}
+for bam in "${bams[@]}"
+do
+	sampleid=$(basename $bam | cut -d'.' -f1)
+	logfile=${logdir}/${sampleid}.log
+	echo "${sampleid},${bam},${cohort},${gtf},${strand},${logfile}" >> $input_file
+done
 
 num_tasks=`wc -l ${input_file}| cut -d' ' -f 1`
 echo "Number of tasks: ${num_tasks}"

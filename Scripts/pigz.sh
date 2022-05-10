@@ -21,36 +21,9 @@ set -e
 #
 #########################################################
 
-module load bbtools/37.98
+# Original file is deleted after compression
+# To keep original, use -k
 
-fastq1=`echo $1 | cut -d ',' -f 1`
-fastq2=`echo $1 | cut -d ',' -f 2`
-out1=`echo $1 | cut -d ',' -f 3`
-out2=`echo $1 | cut -d ',' -f 4`
-readlen=`echo $1 | cut -d ',' -f 5`
-logdir=`echo $1 | cut -d ',' -f 6`
-adapters=`echo $1 | cut -d ',' -f 7`
-NCPUS=`echo $1 | cut -d ',' -f 8`
+file=`echo $1 | cut -d ',' -f 1`
 
-basename=$(basename "$fastq1" | cut -d. -f1)
-uniq_basename="${basename::-1}"
-logfile=${logdir}/${uniq_basename}trimming.log
-
-rm -rf ${logfile}
-
-bbduk.sh -Xmx6g \
-	threads=${NCPUS} \
-	in=${fastq1} \
-	in2=${fastq2} \
-	out=${out1} \
-	out2=${out2} \
-	ref=${adapters} \
-	ktrim=r \
-	k=23 \
-	mink=11 \
-	hdist=1 \
-	tpe \
-	tbo \
-	overwrite=true \
-	trimpolya=${readlen} >> ${logfile} 2>&1
-
+pigz ${file}

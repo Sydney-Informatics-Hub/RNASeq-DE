@@ -1,0 +1,62 @@
+#!/bin/bash
+
+set -e
+
+#########################################################
+#
+# Platform: NCI Gadi HPC
+#
+# Author: Tracy Chew
+# tracy.chew@sydney.edu.au
+#
+# If you use this script towards a publication, please acknowledge the
+# Sydney Informatics Hub (or co-authorship, where appropriate).
+#
+# Suggested acknowledgement:
+# The authors acknowledge the scientific and technical assistance
+# <or e.g. bioinformatics assistance of <PERSON>> of Sydney Informatics
+# Hub and resources and services from the National Computational
+# Infrastructure (NCI), which is supported by the Australian Government
+# with access facilitated by the University of Sydney.
+#
+#########################################################
+
+# Description: Indexes a genome with STAR
+# Usage: Replace <> with your project requirements and where specified.
+# Adjust compute resources using the guide below. Then:
+# qsub star_index.pbs
+# Job resource requirements:Human/mouse genomes require at least 
+# 6CPU, 64Gb memory (E ~ 0.92)
+# Do not use less than 64Gb for these and similar genomes
+# walltime=02:00:00 (job expected to complete in ~0.5 hour)
+# Queue: express is recommended. It's a small job and the time
+# saved in queue is worth it!
+
+#PBS -P <project>
+#PBS -N star_index
+#PBS -l walltime=02:00:00,ncpus=9,mem=64GB,wd
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l storage=scratch/<project>
+#PBS -o ./Logs/star_index.o
+#PBS -e ./Logs/star_index.e
+
+# Load modules
+module load star/2.7.3a
+
+mkdir -p ./Logs
+
+# Change input variables
+dir=../Reference/GRCh38
+# ref and gtf expected in dir
+ref=Homo_sapiens.GRCh38.dna.primary_assembly.fa
+gtf=Homo_sapiens.GRCh38.103.gtf
+overhang=149 # sjdbOverhang = ReadLength-1 (for creating splice junction database)
+
+STAR \
+	--runThreadN ${PBS_NCPUS} \
+	--runMode genomeGenerate \
+	--genomeDir ${dir} \
+	--genomeFastaFiles ${dir}/${ref} \
+	--sjdbGTFfile ${dir}/${gtf} \
+	--sjdbOverhang ${overhang} >> ./Logs/STAR_index.log

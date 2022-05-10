@@ -1,13 +1,17 @@
-#!/bin/bash
+#! /bin/bash
 
 set -e
 
 #########################################################
 #
 # Platform: NCI Gadi HPC
-#
+# Description: Creates input file for htseq-count_run_parallel.pbs
+# for all samples in <cohort>.config
+# Usage:
+# sh htseq-count_make_inputs.sh <cohort>
 # Author: Tracy Chew
 # tracy.chew@sydney.edu.au
+# Date last modified: 27/08/2020
 #
 # If you use this script towards a publication, please acknowledge the
 # Sydney Informatics Hub (or co-authorship, where appropriate).
@@ -19,30 +23,19 @@ set -e
 # Infrastructure (NCI), which is supported by the Australian Government
 # with access facilitated by the University of Sydney.
 #
-#########################################################
+########################################################
 
-fastq=`echo $1 | cut -d ',' -f 1`
-out=`echo $1 | cut -d ',' -f 2`
-readlen=`echo $1 | cut -d ',' -f 3`
-logdir=`echo $1 | cut -d ',' -f 4`
-adapters=`echo $1 | cut -d ',' -f 5`
-NCPUS=`echo $1 | cut -d ',' -f 6`
+#PBS -P <project>
+#PBS -N htseq-count_matrix
+#PBS -l walltime=05:00:00,ncpus=1,mem=32GB,wd
+#PBS -q express
+#PBS -W umask=022
+#PBS -l storage=scratch/<project>
+#PBS -o ./Logs/htseq-count_matrix.o
+#PBS -e ./Logs/htseq-count_matrix.e
 
-basename=$(basename "$fastq" | cut -d. -f1)
-logfile=${logdir}/${basename}_trimming.log
+# PROVIDE PATH TO YOUR CONFIG FILE
+config=../Sample_configs/cohort.config
 
-rm -rf ${logfile}
-
-bbduk.sh -Xmx6g \
-	threads=${NCPUS} \
-	in=${fastq} \
-	out=${out} \
-	ref=${adapters} \
-	ktrim=r \
-	k=23 \
-	mink=11 \
-	hdist=1 \
-	tpe \
-	tbo \
-	overwrite=true \
-	trimpolya=${readlen} >> ${logfile} 2>&1
+mkdir -p ./Logs
+perl ./htseq-count_make_matrix_custom.pl $config
