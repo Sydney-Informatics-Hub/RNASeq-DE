@@ -1,19 +1,49 @@
 # RNASeq-DE
 
-The scripts in this repository process RNA sequencing data (single, paired and/or multiplexed) for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. The scripts include:
+  - [Description](#description)
+  - [User guide](#user-guide)
+  - [Benchmarking](#benchmarking)
+  - [Workflow summaries](#workflow-summaries)
+      - [Metadata](#metadata)
+      - [Component tools](#component-tools)
+      - [Required (minimum)
+        inputs/parameters](#required-minimum-inputsparameters)
+  - [Help/FAQ/Troubleshooting](#helpfaqtroubleshooting)
+  - [3rd party Tutorials](#3rd-party-tutorials)
+  - [Licence(s)](#licences)
+  - [Acknowledgements/citations/credits](#acknowledgementscitationscredits)
 
-1. FastQC to obtain quality reports on raw fastq files
-2. MultiQC to summarize fastQC quality reports on raw fastq files
-3. BBduk trim to trim 3' adapters and poly A tails from raw FASTQ files
-4. FastQC to obtain quality reports on trimmed fastq files
-5. MultiQC to summarize fastQC quality reports on trimmed fastq files
-6. STAR indexing for a given reference genome and corresponding annotation file
-7. STAR for spliced aware alignment of trimmed RNA sequencing reads to a reference genome
-8. SAMtools to merge and index sample BAMs
-9. RSeQC for obtaining a summary of alignment metrics from BAM files
-10. HTSeq for obtaining raw counts 
+# Description
 
-# Set up
+The RNASeq-DE workflow pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. In summary, the steps of this workflow include:
+
+0. Set up (create config file), data transfer, verify md5sums
+1. Raw FASTQ QC: FastQC and MultiQC to obtain quality reports on raw fastq files
+2. Trim raw FASTQs: BBduk trim to trim 3' adapters and poly A tails
+3. Trimmed FASTQ QC: FastQC and MultiQC to obtain quality reports on trimmed fastq files
+4. Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
+5. Mapping: STAR for spliced aware alignment of RNA sequencing reads (FASTQ) to a reference genome
+   * Outputs include: BAM per sample at batch level, unmapped reads (as paired reads), alignment stats
+   * Pigz is used to gzip unmapped files
+6. Merging: SAMtools to merge and index sample BAMs
+   * Outputs: <sample>.final.bam and <sample>_<flowcell>.final.bam (and index files)
+   * This step is particularly for mergining multiplexed samples. For most samples which are not multiplexed, files are simply renamed/symlinked to original STAR bams. 
+   * Note, steps 7 - 9 can be run in parallel.
+7. Collect BAM QC metrics
+     * RSeQC infer_experiment.py - check strand awareness, required for counting. Output: per sample reports which are summarized by cohort in `../QC_reports/<cohort>_final_bams_inter_experiment/<cohort>.txt`
+     * RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR).
+     * RSeQC read_distribution.py - checks which features reads aligned to for each sample (summarized with multiqc). Expect ~30% of reads to align to CDS exons (provides total reads, total tags, total tags assigned. Groups by: CDS exons, 5' UTR, 3' UTR, Introns, TSS up and down regions). 
+    * `summarize_STAR_alignment_stats.pl`: collates per sample STAR metric per flowcell level BAM (use read_distribution for sample level BAMs). Uses datasets present in a cohort.config file to find these BAMs. Inputs: per sample `*Log.final.out`. Output: `../QC_reports/<cohort>_STAR_metrics.txt
+   * SAMtools idxstats: summarize number of reads per chromosome (useful for inferring gender, probably needs a bit more work)
+8. Raw counts: HTSeq
+     * `htseq-count_custom_make_input.sh` to include sample level and sample_flowcell level BAMs
+9. TPM normalized counts: BAMtools/TPMCalculator is used to obtain gene and transcript level TPM normalized counts
+     * Runs TPMcalculator for all BAMs in directory ${bamdir} (therefore will include flowcell level TPMs)
+     * `tpmcalculator_make_matrix.pl` creates sample-gene TPM matrix file using TPM values (col 7) in sample "final_genes.out". These are gene level TPMs.
+
+# User guide
+
+## Set up
 
 The scripts in this repository use relative paths and require careful setup to ensure that scripts can locate input files seamlessly. To start, go to your working directory (e.g. /scratch/ab1 for your ab1 project on NCI Gadi) and:
 
@@ -23,13 +53,14 @@ The scripts in this repository use relative paths and require careful setup to e
 
 You will then need to include:
 
-* Your __Raw FASTQs__ into this directory, keeping FASTQ files from 1 sequencing batch in 1 unique "batch" directory
+* Your __Raw FASTQ files__ into this directory, organised into dataset directories (e.g. Batch_1). Most sequencing companies will provide FASTQs in this structure.
+    *  
 * Your __reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in the relevant `Reference` sub-directory. References can be obtained:
     * following recommendations in the [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf). 
     * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html) 
     * SIH's CloudStor, which contains already genomes already indexed for STAR v2.7.3a (coming soon)!
 
-Your __RNASeq-DE__ directory structure should resemble the following: 
+Your __RNASeq-DE__ directory structure should match the following:
 
 ```bash
 ├── Batch_1
@@ -45,11 +76,11 @@ Your __RNASeq-DE__ directory structure should resemble the following:
 │   └── GRCm38
 │       └── Mus_musculus.GRCm38.dna.toplevel.fa
 │       └── Mus_musculus.GRCm38.98.gtf
-├── samples.config
+├── cohort.config
 └── Scripts
 ```
 
-Edit the __cohort.config__ file. This config file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files. An example is provided below:
+The `cohort.config` file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files. An example is provided below:
 
 |#FASTQ|	SAMPLEID|	DATASET|	REFERENCE_GRCh38_GRCm38|	SEQUENCING_CENTRE|	PLATFORM|	RUN_TYPE_SINGLE_PAIRED|	LIBRARY|
 |------|---------|----------|------------------------|--------------------|-----------|-------------------------|--------|
@@ -57,26 +88,167 @@ Edit the __cohort.config__ file. This config file is used to tell the scripts wh
 |sample1_2.fastq.gz|     SAMPLEID1|       Batch_1| GRCh38|  KCCG|    ILLUMINA|        PAIRED|  1|
 |sample2.fastq.gz|	SAMPLEID2|	Batch_2|	GRCm38|	KCCG|	ILLUMINA|	SINGLE|	1|
 
+To create a `cohort.config file` using excel:
+
+* Open or copy template headers into excel. `cohort.config` is a tab-delimited text file
+* Use column descriptions below to help you populate your config file
+   * __All columns are required in this order and format__
+* Save your `cohort.config` file in the `RNASeq-DE` directory. 
+   * `cohort` is used to name output files and directories. Change the prefix of this file to something more meaningful.
+   
 Column descriptions for __cohort.config__:
 
 |Column name| Description|
 |----|--------|
-|FASTQ| FASTQ file name. This column can be populated with `ls -1` in your sequencing batch directory|
-|SAMPLEID| The sample identifier used in your laboratory. This will be used in naming output files. Avoid whitespace.|
-|DATASET| The sequencing batch that the FASTQ file was generated, and the directory name (must case match) where the FASTQ file is located. |
+|FASTQ| FASTQ filename. This column can be populated with `ls *f*q.gz | sort -V` in your sequencing batch directory. Paired files are recognised by conventional filenames - 1 or 2 at the end of the filename, before the fastq.gz extension e.g. `<sampleid>_<flowcell>_<tag>_<lane>_R<1|2>.fastq.gz`|
+|SAMPLEID| The sample identifier used in your laboratory. Sample IDs are used to name output files. Avoid whitespace.|
+|DATASET| Directory name containing the sample FASTQs. This is typically analogous to the sequencing batch that the FASTQ file was generated. |
 |REFERENCE_GRCh38_GRCm38| Reference subdirectory name, e.g. GRCh38 or GRCm38 in the above example (must case match). Scripts will use reference files (.fasta and .gtf) and STAR index files for the FASTQ file/sample for alignment and counting.  |
-|SEQUENCING_CENTRE| e.g. KCCG. This is used in the read group header in the output BAM file for the aligned FASTQ. No whitespace please.|
+|SEQUENCING_CENTRE| e.g. AGRF. This is used in the read group header in the output BAM file for the aligned FASTQ. Avoid whitespace.|
 |PLATFORM| e.g. ILLUMINA. This is used in the read group header in the output BAM file for the aligned FASTQ.|
-|RUN_TYPE_SINGLE_PAIRED| Input SINGLE or PAIRED. This is used to indicate whether you want to trim, STAR align the FASTQ as single read data or paired end data.| 
-|LIBRARY| The sequencing library of the FASTQ file. This is used in the read group header in the output BAM file for the aligned FASTQ. No whitespace please.|
+|RUN_TYPE_SINGLE_PAIRED| Input SINGLE or PAIRED. This is used to indicate whether you want to process single read data or paired end data (STAR and BBduk trim).| 
+|LIBRARY| The sequencing library of the FASTQ file. This is used in the read group header in the output BAM file for the aligned FASTQ. Use 1 if unknown. No whitespace please.|
 
-## Software
+## Running the pipeline
+
+When you have completed [Set up](#set-up), change into the Scripts directory using `cd Scripts` and run all scripts from here. 
+
+Generally, each step will involve running a make_input script first. This makes an inputs file in `./Inputs` for the run_parallel.pbs
+   
+   script which is run next, once you have modified compute resource requests according to your data requirements (a guide is provided in the script and down below). The run_parallel.pbs script runs a task.sh script in parallel with the requested compute resources per job and per task, where 1 row in the input file = 1 task. Job logs are written in `./Logs`, and task logs to `./Logs/task_name`.
+   
+#### 1. Raw FASTQ QC
+
+This step performs FastQC to obtain quality reports per input FASTQ file. For multiple FASTQ files, reports can be summarized with MultiQC.
+
+* Required inputs: `cohort.config`
+   * "DATASET" is used locate file in "FASTQ" and name output directories
+* Outputs: FastQC and MultiQC reports are written to `../dataset_fastQC`
+   
+To run FastQC for all raw FASTQ files in your `cohort.config` file, create input file for parallel processing:
+
+```
+sh fastqc_make_input.sh cohort.config
+```
+
+Edit `qsub fastqc_run_parallel.pbs` by:
+   * Replacing <project> with your NCI Gadi project short code
+   * Adjusting compute requirements, scaling to your input size (consider number of tasks, size of FASTQ)
+
+Submit `qsub fastqc_run_parallel.pbs` to perform FastQC in parallel (1 fastq file = 1 `fastqc.sh` task) by:
+   
+```
+qsub fastqc_run_parallel.pbs
+```
+
+Once `fastqc_run_parallel.pbs` is complete, you can summarize reports using:
+
+```
+sh multiqc.sh ../dataset_fastQC`
+```
+
+2. Trim raw FASTQs
+
+This step trims raw FASTQ files using BBDuk trim. 
+
+* Required inputs: `cohort.config`
+   * "DATASET" is used locate file in "FASTQ" and name output directories
+   * "RUN_TYPE_SINGLE_PAIRED" is used to indicate whether to trim as single or paired reads
+* Outputs: Directory `../dataset_trimmed` containing trimmed FASTQ files
+   
+The settings below are applied by default:
+   *  Recommendated parameters under the "Adapter Trimming" example on the [BBDuk Guide](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/) are used
+   * `trimpolya=${readlen}`, where `${readlen}` is the length of your sequencing reads, obtained from the FASTQ file (assumes all read lengths in a single FASTQ are equal)
+   * NO quality trimming is applied
+   
+To run BBDuk trim for all raw FASTQ files in your `cohort.config` file, create input file for parallel processing:
+
+```
+sh bbduk_trim_make_input.sh cohort.config
+```
+
+Edit `bbduk_trim_run_parallel.pbs` by:
+   * Replacing <project> with your NCI Gadi project short code
+   * Adjusting compute requirements, scaling to your input size (consider number of tasks, size of FASTQ)
+
+Submit `qsub bbduk_trim_run_parallel.pbs` to run bbduk.sh in parallel (1 FASTQ pair = 1 input for `bbduk_trim_paired.sh`, 1 FASTQ file = 1 input for `bbduk_trim_single.sh`):
+   
+```
+qsub bbduk_trim_run_parallel.pbs
+```
+
+The remainder of the guide is coming soon!
+
+#### 3. Trimmed FASTQ QC
+
+#### 4. Prepare reference
+   
+#### 5. Mapping
+
+#### 6. Merging lane level BAMs into sample level BAMs
+
+#### 7. Collect BAM QC metrics
+
+#### 8. Raw counts: HTSeq
+
+#### 9. TPM normalized counts: BAMtools/TPMCalculator is used to obtain gene and transcript level TPM normalized counts
+         
+# Benchmarking
+
+The below metrics were obtained for a human cohort comprised of:
+* 96 FASTQ pairs
+* ~80 M paired reads (each read 150 bp length)
+
+| #JobName                              | CPUs_requested | CPUs_used | Mem_requested | Mem_used | CPUtime    | CPUtime_mins | Walltime_req | Walltime_used | Walltime_mins | JobFS_req | JobFS_used | Efficiency | Service_units(CPU_hours) | Job_exit_status | Date       | Time     |
+|---------------------------------------|----------------|-----------|---------------|----------|------------|--------------|--------------|---------------|---------------|-----------|------------|------------|--------------------------|-----------------|------------|----------|
+| bam_stat.o                            | 112            | 112       | 512.0GB       | 269.54GB | 208:45:39  | 12525.65     | 10:00:00     | 2:05:41       | 125.68        | 400.0MB   | 8.26MB     | 0.89       | 293.26                   | 0               | 23/02/2022 | 11:16:58 |
+| bbduk_trim.o                          | 48             | 48        | 190.0GB       | 169.67GB | 22:36:20   | 1356.33      | 4:00:00      | 0:40:14       | 40.23         | 100.0MB   | 8.17MB     | 0.7        | 64.37                    | 0               | 22/02/2022 | 15:29:34 |
+| fastqc.o                              | 30             | 30        | 150.0GB       | 106.41GB | 8:18:12    | 498.2        | 5:00:00      | 0:26:32       | 26.53         | 100.0MB   | 8.12MB     | 0.63       | 33.17                    | 0               | 22/02/2022 | 15:16:39 |
+| fastqc_trimmed.o                      | 30             | 30        | 150.0GB       | 97.6GB   | 8:12:31    | 492.52       | 2:00:00      | 0:25:08       | 25.13         | 100.0MB   | 8.12MB     | 0.65       | 31.42                    | 0               | 22/02/2022 | 15:58:45 |
+| htseq-count.o                         | 240            | 240       | 950.0GB       | 582.53GB | 2562:06:24 | 153726.4     | 30:00:00     | 19:51:09      | 1191.15       | 500.0MB   | 8.33MB     | 0.54       | 9529.2                   | 0               | 24/02/2022 | 4:58:30  |
+| htseq-count_matrix.o                  | 1              | 1         | 32.0GB        | 16.02GB  | 0:02:53    | 2.88         | 5:00:00      | 0:03:45       | 3.75          | 100.0MB   | 0B         | 0.77       | 3                        | 0               | 24/02/2022 | 9:03:09  |
+| multiqc_all_datasets_fastQC.o         | 1              | 1         | 32.0GB        | 247.41MB | 0:00:02    | 0.03         | 5:00:00      | 0:00:04       | 0.07          | 100.0MB   | 0B         | 0.43       | 0.05                     | 2               | 4/03/2022  | 15:18:18 |
+| multiqc_all_datasets_trimmed_fastQC.o | 1              | 1         | 32.0GB        | 26.59GB  | 0:06:07    | 6.12         | 5:00:00      | 0:09:37       | 9.62          | 100.0MB   | 1.45MB     | 0.64       | 7.69                     | 0               | 4/03/2022  | 15:28:28 |
+| pigz.o                                | 28             | 28        | 128.0GB       | 33.98GB  | 1:25:20    | 85.33        | 2:00:00      | 0:07:15       | 7.25          | 100.0MB   | 8.1MB      | 0.42       | 4.23                     | 0               | 22/02/2022 | 17:32:47 |
+| read_distribution.o                   | 144            | 144       | 570.0GB       | 419.27GB | 278:19:37  | 16699.62     | 10:00:00     | 2:28:54       | 148.9         | 300.0MB   | 8.4MB      | 0.78       | 714.72                   | 0               | 23/02/2022 | 11:42:52 |
+| samtools_merge_index.o                | 48             | 48        | 190.0GB       | 99.15GB  | 86:30:00   | 5190         | 10:00:00     | 2:44:15       | 164.25        | 100.0MB   | 8.25MB     | 0.66       | 262.8                    | 0               | 22/02/2022 | 20:18:34 |
+| star_align_trimmed_unmapped_out.o     | 240            | 240       | 950.0GB       | 736.62GB | 42:09:54   | 2529.9       | 24:00:00     | 0:21:28       | 21.47         | 500.0MB   | 8.17MB     | 0.49       | 171.73                   | 0               | 22/02/2022 | 15:59:35 |
+| tpmcalculator_transcript.o            | 768            | 768       | 2.97TB        | 2.63TB   | 978:52:39  | 58732.65     | 10:00:00     | 5:14:53       | 314.88        | 1.56GB    | 8.38MB     | 0.24       | 8061.01                  | 0               | 23/02/2022 | 14:31:26 |
+| tpmtranscript_matrix.o                | 1              | 1         | 96.0GB        | 53.19GB  | 0:37:32    | 37.53        | 5:00:00      | 0:45:33       | 45.55         | 100.0MB   | 0B         | 0.82       | 109.32                   | 0               | 24/02/2022 | 13:54:22 |
+```
+
+# Workflow summaries
+
+## Metadata
+
+```
+Example table below 
+```
+
+|metadata field     | workflow_name / workflow_version  |
+|-------------------|:---------------------------------:|
+|Version            | 1.0                 |
+|Maturity           | stable                            |
+|Creators           | Tracy Chew                 |
+|Source             | NA                                |
+|License            | GNU GENERAL PUBLIC LICENSE        |
+|Workflow manager   | None                          |
+|Container          | None                              |
+|Install method     | Manual                            |
+|GitHub             | NA                                |
+|bio.tools 	        | NA                                |
+|BioContainers      | NA                                | 
+|bioconda           | NA                                |
+
+---
+
+## Component tools
 
 The software listed below are used in the RNASeq-DE pipeline. Some of these are installed globally on NCI Gadi (check with `module avail` for the current software). Install python3 packages by `module load python3/3.8.5`, and then using the `pip3 install` commands as listed below. These will be installed in `$HOME`. All other software need to be installed in your project's `/scratch` directory and module loadable. 
 
 openmpi/4.0.2 (installed globally)
 
-nci-parallel/1.0.0 (installed globally)
+nci-parallel/1.0.0a (installed globally)
 
 SAMtools/1.10 (installed globally)
 
@@ -94,47 +266,43 @@ BBDuk/37.98
 
 STAR/2.7.3a
 
-# Running the pipeline
+rseqc/4.0.0
 
-Change into the Scripts directory using `cd Scripts` and run all steps below in sequence to process data for samples belonging to `dataset` in `..cohort.config`. 
+samtools/1.10
 
-Generally, each step will involve running a make_input script first. This makes inputs for the run_parallel.pbs script which is run next, once you have modified compute resource requests according to your data requirements (a guide is provided in the script and down below). The run_parallel.pbs script runs a task.sh script in parallel with the requested compute resources per job and per task, where 1 row in the input file = 1 task. 
+bamtools/2.5.1, TPMCalculator/0.0.4
 
-1. Obtain quality reports with FastQC for your raw fastq files by:
-      * `sh fastqc_make_input.sh cohort`. 
-      * Editing `fastqc_run_parallel.pbs` project id and compute requirements and submitting the job by `qsub fastqc_run_parallel.pbs`
-      * Description: `fastqc_make_input.sh` creates inputs for each fastq file. FastQC reports are written to `../dataset_fastQC` (1 fastq file = 1 `fastqc.sh` task). Inputs are ordered by filesize.
-2. Summarize fastQC quality reports for raw fastq files using MultiQC by:
-      * `sh multiqc.sh cohort`
-      * Description: This will run multiqc for each raw fastq for dataset in `..cohort.config`. This job only takes a couple of seconds (for cohorts with <100 samples, ~30M paired end reads) and can be run on the command line. MultiQC reports are written to `../dataset_fastQC`. Before moving on, you should assess your multiqc output by looking at `multiqc_report.html` on a browser or checking `multiqc_data/multiqc_fastqc.txt and multiqc_data/multiqc_general_stats.txt`
-3. Trim 3' adapters and poly A tails from raw FASTQ files by:
-      * `sh bbduk_trim_make_input.sh cohort`
-      * Editing `bbduk_trim_run_parallel.pbs` project id and compute requirements and submitting the job by `qsub bbduk_trim_run_parallel.pbs`
-      * Description: This script performs trimming of raw FASTQ files for single read and/or paired read data as specified by the RUN_TYPE_SINGLE_PAIRED column in your config file. Trimmed FASTQs are written to `../dataset_trimmed`. By default, scripts perform adapter trimming following recommendations under "Adapter Trimming" on the [BBDuk Guide](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/), and in addition, will perform poly A tail trimming for the entire length of the input reads.
-4. Obtain quality reports with FastQC for trimmed fastq files by:
-      * `sh fastqc_trimmed_make_input.sh cohort`
-      * Editing `fastqc_trimmed_run_parallel.pbs` project id and compute requirements and submitting the job by `qsub fastqc_trimmed_run_parallel.pbs`. 
-      * Description: `fastqc_trimmed_make_input.sh` creates inputs for each trimmed fastq file in `../dataset_trimmed`. FastQC reports are written to `../dataset_fastQC_trimmed` (1 fastq file = 1 `fastqc.sh` task). Inputs are ordered by filesize.
- 5. Summarize fastQC quality reports for trimmed fastq files using MultiQC by:
-      * `sh multiqc_trimmed.sh cohort`
-      * This will run multiqc for each trimmed fastq file for dataset in `..cohort.config`. This job only takes a couple of seconds (for cohorts with <100 samples, ~30M paired end reads) and can be run on the command line. MultiQC reports are written to `../dataset_fastQC_trimmed`. Before moving on, you should assess your multiqc output by looking at `multiqc_report.html` on a browser or checking `multiqc_data/multiqc_fastqc.txt and multiqc_data/multiqc_general_stats.txt` and compare it to quality reports for the raw FASTQ files.
-6. Index reference genome and annotation file using STAR. 
-      * Description: Indexing must be performed using the same version of STAR that will be used for the STAR mapping step
-      
-# Benchmarking metrics
+## Required (minimum) inputs/parameters
 
-The below metrics were obtained for a mouse dataset with 10 samples, ~33 M reads, 150 base pair, paired end reads. 
+* Short read FASTQ files (single or paired)
+* Reference genome (FASTA), annotation (GTF) files. These can be obtained from [Ensembl FTP](http://www.ensembl.org/info/data/ftp/index.html)
 
-|#JobName|CPUs_requested|CPUs_used|Mem_requested|Mem_used|CPUtime|CPUtime_mins|Walltime_req|Walltime_used|Walltime_mins|JobFS_req|JobFS_used|Efficiency|Service_units(CPU_hours)|Queue|NCPUS/task|
-|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
-|fastqc.o|	5|	5|	20.0GB|	20.0GB|	01:44:24|	104.40|	01:00:00|	00:21:30|	21.50|	100.0MB|	8.05MB|	0.97|	3.58|normal|1|
-|bbduktrim.o|	5|	5|	80.0GB|	74.0GB|	04:46:22|	286.37|	03:00:00|	01:03:02|	63.03|	100.0MB|	8.05MB|	0.91|	42.02|normal|1|
+Refer to the [User guide](#user-guide) for default/required parameters.
 
+# Help / FAQ / Troubleshooting
 
-# Supplementary scripts
+* Contact NCI for NCI related queries
+* Contact tool developers for tool specific queries
+* For RNASeq-DE workflow queries, please submit a [Github issue](https://github.com/Sydney-Informatics-Hub/RNASeq-DE/issues)
 
-* `sh multiqc_single_dataset.sh Batch_1` performs multiqc for a single sequencing batch, e.g. Batch_1, as specified by DATASET in ..<cohort>.config. Run after fastQC.
+# License(s)
+
+GNU General Public License v3.0
+
+# Acknowledgements/citations/credits
+
+### Authors 
+
+- Tracy Chew (Sydney Informatics Hub, University of Sydney)
+- Rosemarie Sadsad
+
+### Acknowledgements 
+Acknowledgements (and co-authorship, where appropriate) are an important way for us to demonstrate the value we bring to your research. Your research outcomes are vital for ongoing funding of the Sydney Informatics Hub and national compute facilities. We suggest including the following acknowledgement in any publications that follow from this work:
+
+The authors acknowledge the technical assistance provided by the Sydney Informatics Hub, a Core Research Facility of the University of Sydney and the Australian BioCommons which is enabled by NCRIS via Bioplatforms Australia.
+
+Documentation was created following the [Australian BioCommons documentation guidelines](https://github.com/AustralianBioCommons/doc_guidelines).
 
 # Cite us to support us!
- 
-The RNASeq-DE pipeline can be cited as DOI: https://doi.org/10.48546/workflowhub.workflow.152.1  
+
+ Chew, T., & Sadsad, R. (2022). RNASeq-DE (Version 1.0) [Computer software]. https://doi.org/10.48546/workflowhub.workflow.152.1
