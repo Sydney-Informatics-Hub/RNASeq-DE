@@ -15,30 +15,31 @@
 
 # Description
 
-The RNASeq-DE workflow pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. In summary, the steps of this workflow include:
+RNASeq-DE is a scalable workflow that pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. In summary, the steps of this workflow include:
 
 0. __Set up__
 1. __QC of raw FASTQs__: FastQC and MultiQC to obtain quality reports on raw fastq files
-2. __Trim raw FASTQs__: BBduk trim to trim 3' adapters and poly A tails
-3. __QC of trimmed FASTQs__: FastQC and MultiQC to obtain quality reports on trimmed fastq files
-4. __Mapping__: STAR for spliced aware alignment of RNA sequencing reads (FASTQ) to a reference genome
-   * Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
-   * Outputs include: BAM per sample at batch level, unmapped reads (as paired reads), alignment stats
-   * Pigz is used to gzip unmapped files
-5. __Merge lane level to sample level BAMs__: SAMtools to merge and index sample BAMs
-   * Outputs: <sample>.final.bam and <sample>_<flowcell>.final.bam (and index files)
-   * This step is particularly for mergining multiplexed samples. For most samples which are not multiplexed, files are simply renamed/symlinked to original STAR bams. 
-6. __Collect BAM QC metrics__
-     * RSeQC infer_experiment.py - check strand awareness, required for counting. Output: per sample reports which are summarized by cohort in `../QC_reports/<cohort>_final_bams_inter_experiment/<cohort>.txt`
-     * RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR).
-     * RSeQC read_distribution.py - checks which features reads aligned to for each sample (summarized with multiqc). Expect ~30% of reads to align to CDS exons (provides total reads, total tags, total tags assigned. Groups by: CDS exons, 5' UTR, 3' UTR, Introns, TSS up and down regions). 
-    * `summarize_STAR_alignment_stats.pl`: collates per sample STAR metric per flowcell level BAM (use read_distribution for sample level BAMs). Uses datasets present in a cohort.config file to find these BAMs. Inputs: per sample `*Log.final.out`. Output: `../QC_reports/<cohort>_STAR_metrics.txt
-   * SAMtools idxstats: summarize number of reads per chromosome (useful for inferring gender, probably needs a bit more work)
-7. __Raw counts__: HTSeq
-     * `htseq-count_custom_make_input.sh` to include sample level and sample_flowcell level BAMs
-8. __Normalized counts__: BAMtools/TPMCalculator is used to obtain gene and transcript level TPM normalized counts
-     * Runs TPMcalculator for all BAMs in directory ${bamdir} (therefore will include flowcell level TPMs)
-     * `tpmcalculator_make_matrix.pl` creates sample-gene TPM matrix file using TPM values (col 7) in sample "final_genes.out". These are gene level TPMs.
+2. __Trim raw FASTQs__: BBduk trim to trim 3' adapters and poly A tails. [Optional] - QC trimmed FASTQs.
+3. __Mapping__: STAR for spliced aware alignment of RNA sequencing reads (FASTQ) to a reference genome
+  * Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
+  * Perform mapping with trimmed FASTQs to prepared reference
+  * Pigz is used to gzip unmapped files
+  * Outputs: BAM per FASTQ pair (sequencing batch), unmapped reads, alignment stats
+4. __Merge lane level to sample level BAMs__: SAMtools to merge and index sample BAMs
+  * Merge multiplexed BAMs into sample level BAMs. For samples which are not multiplexed, files are renamed/symlinked for consistent file naming.
+  * Outputs: `<sampleid>.final.bam` and `<sampleid>_<flowcell>.final.bam` (and index files)
+5. __QC of mapping__
+  * RSeQC infer_experiment.py - check strand awareness, required for counting. Output: per sample reports which are summarized by cohort in `../QC_reports/<cohort>_final_bams_inter_experiment/<cohort>.txt`
+  * [Optional] RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR, but can be used on sample level BAMs).
+  * RSeQC read_distribution.py - checks which features reads aligned to for each sample (summarized with multiqc). Expect ~30% of reads to align to CDS exons (provides total reads, total tags, total tags assigned. Groups by: CDS exons, 5' UTR, 3' UTR, Introns, TSS up and down regions). 
+  * [Optional] `summarize_STAR_alignment_stats.pl`: collates per sample STAR metric per flowcell level BAM (use read_distribution for sample level BAMs). Uses datasets present in a cohort.config file to find these BAMs. Inputs: per sample `*Log.final.out`. Output: `../QC_reports/<cohort>_STAR_metrics.txt
+  * [Optional] SAMtools idxstats: summarize number of reads per chromosome (useful for inferring gender, probably needs a bit more work)
+6. __Raw counts__: HTSeq
+  * Count reads in `<sampleid>.final.bam` that align to features in your reference and create a count matrix for a cohort
+  * Output: `<sample>.counts` per input BAM and a count matrix as `<cohort>.counts`
+7. __Normalized counts__: BAMtools/TPMCalculator
+  * Obtain TPM normalized counts for gene and transcripts in your reference from `<sampleid>.final.bam` and create a TPM count matrix for a cohort
+  * Output: Per sample TPM counts and cohort count matricies as `TPM_TranscriptLevel.counts`, `TPM_GeneLevel.counts`
 
 # User guide
 
@@ -132,8 +133,8 @@ sh fastqc_make_input.sh cohort.config
 ```
 
 Edit `qsub fastqc_run_parallel.pbs` by:
-   * Replacing <project> with your NCI Gadi project short code
-   * Adjusting compute requirements, scaling to your input size (consider number of tasks, size of FASTQ)
+   * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+   * Adjusting PBS directive compute requests, scaling to your input size (consider number of tasks, size of FASTQ)r
 
 Submit `qsub fastqc_run_parallel.pbs` to perform FastQC in parallel (1 fastq file = 1 `fastqc.sh` task) by:
    
@@ -168,8 +169,8 @@ sh bbduk_trim_make_input.sh cohort.config
 ```
 
 Edit `bbduk_trim_run_parallel.pbs` by:
-   * Replacing <project> with your NCI Gadi project short code
-   * Adjusting compute requirements, scaling to your input size (consider number of tasks, size of FASTQ)
+   * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+   * Adjusting PBS directive compute requests, scaling to your input size (consider number of tasks, size of FASTQ)
 
 Submit `qsub bbduk_trim_run_parallel.pbs` to run bbduk.sh in parallel (1 FASTQ pair = 1 input for `bbduk_trim_paired.sh`, 1 FASTQ file = 1 input for `bbduk_trim_single.sh`):
    
