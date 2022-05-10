@@ -18,9 +18,9 @@
 The RNASeq-DE workflow pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. In summary, the steps of this workflow include:
 
 0. __Set up__
-1. __Raw FASTQ QC__: FastQC and MultiQC to obtain quality reports on raw fastq files
+1. __QC of raw FASTQs__: FastQC and MultiQC to obtain quality reports on raw fastq files
 2. __Trim raw FASTQs__: BBduk trim to trim 3' adapters and poly A tails
-3. __Trimmed FASTQ QC__: FastQC and MultiQC to obtain quality reports on trimmed fastq files
+3. __QC of trimmed FASTQs__: FastQC and MultiQC to obtain quality reports on trimmed fastq files
 4. __Mapping__: STAR for spliced aware alignment of RNA sequencing reads (FASTQ) to a reference genome
    * Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
    * Outputs include: BAM per sample at batch level, unmapped reads (as paired reads), alignment stats
@@ -117,7 +117,7 @@ Generally, each step will involve running a make_input script first. This makes 
    
    script which is run next, once you have modified compute resource requests according to your data requirements (a guide is provided in the script and down below). The run_parallel.pbs script runs a task.sh script in parallel with the requested compute resources per job and per task, where 1 row in the input file = 1 task. Job logs are written in `./Logs`, and task logs to `./Logs/task_name`.
    
-#### 1. Raw FASTQ QC
+### 1. QC of raw FASTQs
 
 This step performs FastQC to obtain quality reports per input FASTQ file. For multiple FASTQ files, reports can be summarized with MultiQC.
 
@@ -147,7 +147,7 @@ Once `fastqc_run_parallel.pbs` is complete, you can summarize reports using:
 sh multiqc.sh ../dataset_fastQC`
 ```
 
-#### 2. Trim raw FASTQs
+### 2. Trim raw FASTQs
 
 This step trims raw FASTQ files using BBDuk trim. 
 
@@ -179,19 +179,17 @@ qsub bbduk_trim_run_parallel.pbs
 
 The remainder of the guide is coming soon!
 
-#### 3. Trimmed FASTQ QC
+### 3. QC of trimmed FASTQs
 
-#### 4. Prepare reference
-   
-#### 5. Mapping
+### 4. Mapping
 
-#### 6. Merging lane level BAMs into sample level BAMs
+### 5. Merging lane level BAMs into sample level BAMs
 
-#### 7. Collect BAM QC metrics
+### 6. Collect BAM QC metrics
 
-#### 8. Raw counts: HTSeq
+### 7. Raw counts
 
-#### 9. TPM normalized counts: BAMtools/TPMCalculator is used to obtain gene and transcript level TPM normalized counts
+### 8. Normalize counts
          
 # Benchmarking
 
@@ -207,7 +205,6 @@ The below metrics were obtained for a human cohort comprised of:
 | fastqc_trimmed.o                      | 30             | 30        | 150.0GB       | 97.6GB   | 8:12:31    | 492.52       | 2:00:00      | 0:25:08       | 25.13         | 100.0MB   | 8.12MB     | 0.65       | 31.42                    | 0               | 22/02/2022 | 15:58:45 |
 | htseq-count.o                         | 240            | 240       | 950.0GB       | 582.53GB | 2562:06:24 | 153726.4     | 30:00:00     | 19:51:09      | 1191.15       | 500.0MB   | 8.33MB     | 0.54       | 9529.2                   | 0               | 24/02/2022 | 4:58:30  |
 | htseq-count_matrix.o                  | 1              | 1         | 32.0GB        | 16.02GB  | 0:02:53    | 2.88         | 5:00:00      | 0:03:45       | 3.75          | 100.0MB   | 0B         | 0.77       | 3                        | 0               | 24/02/2022 | 9:03:09  |
-| multiqc_all_datasets_fastQC.o         | 1              | 1         | 32.0GB        | 247.41MB | 0:00:02    | 0.03         | 5:00:00      | 0:00:04       | 0.07          | 100.0MB   | 0B         | 0.43       | 0.05                     | 2               | 4/03/2022  | 15:18:18 |
 | multiqc_all_datasets_trimmed_fastQC.o | 1              | 1         | 32.0GB        | 26.59GB  | 0:06:07    | 6.12         | 5:00:00      | 0:09:37       | 9.62          | 100.0MB   | 1.45MB     | 0.64       | 7.69                     | 0               | 4/03/2022  | 15:28:28 |
 | pigz.o                                | 28             | 28        | 128.0GB       | 33.98GB  | 1:25:20    | 85.33        | 2:00:00      | 0:07:15       | 7.25          | 100.0MB   | 8.1MB      | 0.42       | 4.23                     | 0               | 22/02/2022 | 17:32:47 |
 | read_distribution.o                   | 144            | 144       | 570.0GB       | 419.27GB | 278:19:37  | 16699.62     | 10:00:00     | 2:28:54       | 148.9         | 300.0MB   | 8.4MB      | 0.78       | 714.72                   | 0               | 23/02/2022 | 11:42:52 |
@@ -220,10 +217,6 @@ The below metrics were obtained for a human cohort comprised of:
 # Workflow summaries
 
 ## Metadata
-
-```
-Example table below 
-```
 
 |metadata field     | workflow_name / workflow_version  |
 |-------------------|:---------------------------------:|
@@ -240,7 +233,6 @@ Example table below
 |BioContainers      | NA                                | 
 |bioconda           | NA                                |
 
----
 
 ## Component tools
 
@@ -254,11 +246,11 @@ SAMtools/1.10 (installed globally)
 
 python3/3.8.5 (installed globally)
 
-`pip3 install multiqc`
+pip3 install multiqc
 
-`pip3 install RSeQC`
+pip3 install RSeQC
 
-`pip3 install HTSeq`
+pip3 install HTSeq
 
 fastQC/0.11.7
 
@@ -276,8 +268,6 @@ bamtools/2.5.1, TPMCalculator/0.0.4
 
 * Short read FASTQ files (single or paired)
 * Reference genome (FASTA), annotation (GTF) files. These can be obtained from [Ensembl FTP](http://www.ensembl.org/info/data/ftp/index.html)
-
-Refer to the [User guide](#user-guide) for default/required parameters.
 
 # Help / FAQ / Troubleshooting
 
