@@ -56,11 +56,13 @@ cd RNASeq-DE
 
 ### Required inputs and directory structure
 
+Please provide the following files to run the workflow:
+
 * __Raw FASTQ files__ organised into dataset directories. Most sequencing companies will provide FASTQs in this structure. 
 * __Reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in a sub-directory in `Reference`. References can be obtained:
     * following recommendations in the [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf). 
     * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html)
-* __Config file__: create using the [guide](#cohort.config) below.
+* __.config file__: create using the [guide](#cohortconfig) below.
 
 Your __RNASeq-DE__ directory structure should match the following:
 
