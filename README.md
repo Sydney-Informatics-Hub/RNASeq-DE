@@ -88,7 +88,7 @@ Your __RNASeq-DE__ directory structure should match the following:
 
 The `cohort.config` file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files. An example is provided below:
 
-|#FASTQ|	SAMPLEID|	DATASET|	REFERENCE_GRCh38_GRCm38|	SEQUENCING_CENTRE|	PLATFORM|	RUN_TYPE_SINGLE_PAIRED|	LIBRARY|
+|#FASTQ|	SAMPLEID|	DATASET|	REFERENCE|	SEQUENCING_CENTRE|	PLATFORM|	RUN_TYPE_SINGLE_PAIRED|	LIBRARY|
 |------|---------|----------|------------------------|--------------------|-----------|-------------------------|--------|
 |sample1_1.fastq.gz|	SAMPLEID1|	Batch_1|	GRCh38|	KCCG|	ILLUMINA|	PAIRED|	1|
 |sample1_2.fastq.gz|     SAMPLEID1|       Batch_1| GRCh38|  KCCG|    ILLUMINA|        PAIRED|  1|
@@ -106,10 +106,10 @@ Column descriptions for __cohort.config__:
 
 |Column name| Description|
 |----|--------|
-|FASTQ| FASTQ filename. This column can be populated with `ls *f*q.gz | sort -V` in your sequencing batch directory. Paired files are recognised by conventional filenames - 1 or 2 at the end of the filename, before the fastq.gz extension e.g. `<sampleid>_<flowcell>_<tag>_<lane>_R<1|2>.fastq.gz`|
+|#FASTQ| FASTQ filename. This column can be populated with `ls *f*q.gz | sort -V` in your sequencing batch directory. Paired files are recognised by conventional filenames - 1 or 2 at the end of the filename, before the fastq.gz extension e.g. `<sampleid>_<flowcell>_<tag>_<lane>_R<1|2>.fastq.gz`|
 |SAMPLEID| The sample identifier used in your laboratory. Sample IDs are used to name output files. Avoid whitespace.|
 |DATASET| Directory name containing the sample FASTQs. This is typically analogous to the sequencing batch that the FASTQ file was generated. |
-|REFERENCE_GRCh38_GRCm38| Reference subdirectory name, e.g. GRCh38 or GRCm38 in the above example (must case match). Scripts will use reference files (.fasta and .gtf) and STAR index files for the FASTQ file/sample for alignment and counting.  |
+|REFERENCE| Reference subdirectory name, e.g. GRCh38 or GRCm38 in the above example (must case match). Scripts will use reference files (.fasta and .gtf) and STAR index files for the FASTQ file/sample for alignment and counting. |
 |SEQUENCING_CENTRE| e.g. AGRF. This is used in the read group header in the output BAM file for the aligned FASTQ. Avoid whitespace.|
 |PLATFORM| e.g. ILLUMINA. This is used in the read group header in the output BAM file for the aligned FASTQ.|
 |RUN_TYPE_SINGLE_PAIRED| Input SINGLE or PAIRED. This is used to indicate whether you want to process single read data or paired end data (STAR and BBduk trim).| 
@@ -119,9 +119,14 @@ Column descriptions for __cohort.config__:
 
 When you have completed [Set up](#set-up), change into the Scripts directory using `cd Scripts` and run all scripts from here. 
 
-Generally, each step will involve running a make_input script first. This makes an inputs file in `./Inputs` for the run_parallel.pbs
-   
-   script which is run next, once you have modified compute resource requests according to your data requirements (a guide is provided in the script and down below). The run_parallel.pbs script runs a task.sh script in parallel with the requested compute resources per job and per task, where 1 row in the input file = 1 task. Job logs are written in `./Logs`, and task logs to `./Logs/task_name`.
+Generally, steps involve:
+1. Running a `<task>_make_input.sh` script to prepare for parallel processing.
+  * This makes an inputs file, e.g. `./Inputs/<task>.inputs`
+  * This will often use your `<cohort>.config` file to know which files or samples you would like to process in parallel
+2. Running a `<task>_run_parallel.pbs` script. 
+  * This launches multiple tasks (e.g. `./Scripts/<task>.sh`) in parallel
+  * Each line of `./Inputs/<task>.inputs` is used as input into a single `<task>.sh`
+  * __Compute resources__ should be scaled to the size of your data, using this user guide or [benchmarking](#benchmarking) as a guide
    
 ### 1. QC of raw FASTQs
 
@@ -139,7 +144,8 @@ sh fastqc_make_input.sh cohort.config
 
 Edit `qsub fastqc_run_parallel.pbs` by:
    * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
-   * Adjusting PBS directive compute requests, scaling to your input size (consider number of tasks, size of FASTQ)r
+   * Adjusting PBS directive compute requests, scaling to your input size (consider number of tasks, size of FASTQ)
+      * Each task requires NCPU=1. 1 FASTQ file containing ~15 M reads takes about 00:05:00 in walltime. 
 
 Submit `qsub fastqc_run_parallel.pbs` to perform FastQC in parallel (1 fastq file = 1 `fastqc.sh` task) by:
    
@@ -160,9 +166,9 @@ This step trims raw FASTQ files using BBDuk trim.
 * Required inputs: `cohort.config`
    * "DATASET" is used locate file in "FASTQ" and name output directories
    * "RUN_TYPE_SINGLE_PAIRED" is used to indicate whether to trim as single or paired reads
-* Outputs: Directory `../dataset_trimmed` containing trimmed FASTQ files
+* Outputs: Directory `../<dataset>_trimmed` containing trimmed FASTQ files
    
-The settings below are applied by default:
+Task scripts `bbduk_trim_paired.sh` and `bbduk_trim_single.sh`are apply the following settings by default:
    *  Recommendated parameters under the "Adapter Trimming" example on the [BBDuk Guide](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/) are used
    * `trimpolya=${readlen}`, where `${readlen}` is the length of your sequencing reads, obtained from the FASTQ file (assumes all read lengths in a single FASTQ are equal)
    * NO quality trimming is applied
@@ -176,6 +182,7 @@ sh bbduk_trim_make_input.sh cohort.config
 Edit `bbduk_trim_run_parallel.pbs` by:
    * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
    * Adjusting PBS directive compute requests, scaling to your input size (consider number of tasks, size of FASTQ)
+      * NCPU=6
 
 Submit `qsub bbduk_trim_run_parallel.pbs` to run bbduk.sh in parallel (1 FASTQ pair = 1 input for `bbduk_trim_paired.sh`, 1 FASTQ file = 1 input for `bbduk_trim_single.sh`):
    
