@@ -15,7 +15,7 @@
 
 # Description
 
-RNASeq-DE is a highly scalable workflow that pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. The workflow was designed to efficiently process and manage large scale projects (100s of samples sequenced over multiple batches). 
+RNASeq-DE is a highly scalable workflow that pre-processes Illumina RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. The workflow was designed to efficiently process and manage large scale projects (100s of samples sequenced over multiple batches). 
 
 In summary, the steps of this workflow include:
 
@@ -25,7 +25,7 @@ In summary, the steps of this workflow include:
 3. __Mapping__: STAR for spliced aware alignment of RNA sequencing reads (FASTQ) to a reference genome
     * Prepare reference: STAR indexing for a given reference genome and corresponding annotation file
     * Perform mapping with trimmed FASTQs to prepared reference
-    * Pigz is used to gzip unmapped files
+    * Compress unmapped reads with pigz (optional)
     * Outputs: BAM per FASTQ pair (sequencing batch), unmapped reads, alignment stats
 4. __Merge lane level to sample level BAMs__: SAMtools to merge and index sample BAMs
     * Merge multiplexed BAMs into sample level BAMs. For samples which are not multiplexed, files are renamed/symlinked for consistent file naming.
@@ -59,6 +59,8 @@ cd RNASeq-DE
 Please provide the following files to run the workflow:
 
 * __Raw FASTQ files__ organised into dataset directories. Most sequencing companies will provide FASTQs in this structure. 
+    * Only Illumina short read data is supported
+    * FASTQ sequence identifier must follow the [standard Illumina format](https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm) `@<instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos>:<UMI> <read>:<is filtered>:<control number>:<index>`. 
 * __Reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in a sub-directory in `Reference`. References can be obtained:
     * following recommendations in the [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf). 
     * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html)
@@ -126,7 +128,7 @@ Generally, steps involve:
 2. Running a `<task>_run_parallel.pbs` script. 
    * This launches multiple tasks (e.g. `./Scripts/<task>.sh`) in parallel
    * Each line of `./Inputs/<task>.inputs` is used as input into a single `<task>.sh`
-   * __Compute resources__ should be scaled to the size of your data, using this user guide or [benchmarking](#benchmarking) as a guide
+   * __Compute resources__ should be scaled to the size of your data. Recommendations are provided in the user guide. [Benchmarking](#benchmarking) can also be used as a guide.
    
 ### 1. QC of raw FASTQs
 
@@ -142,7 +144,7 @@ To run FastQC for all raw FASTQ files in your `cohort.config` file, create input
 sh fastqc_make_input.sh cohort.config
 ```
 
-Edit `qsub fastqc_run_parallel.pbs` by:
+Edit `fastqc_run_parallel.pbs` by:
    * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
    * Adjusting PBS directive compute requests, scaling to your input size
       * Each `fastqc.sh` task requires NCPUS=1, 4 GB mem and ~00:30:00 walltime to process one FASTQ file with ~90 M reads. Scale walltime to number of expected reads per FASTQ.
@@ -186,7 +188,7 @@ Edit `bbduk_trim_run_parallel.pbs` by:
       * Each `bbduk_trim_paired.sh` task requires NCPU=6, 23 GB mem and ~00:19:00 walltime for 90 M pairs of FASTQ reads.
       * For ~15 FASTQ pairs, 90 M pairs each, I recommend: `-l walltime=02:00:00,ncpus=48,mem=190GB,wd`, `-q normal`
 
-Submit `qsub bbduk_trim_run_parallel.pbs`. This launches parallel tasks for: 1 FASTQ pair = 1 input for `bbduk_trim_paired.sh`, 1 FASTQ file = 1 input for `bbduk_trim_single.sh`:
+Submit `bbduk_trim_run_parallel.pbs`. This launches parallel tasks for: 1 FASTQ pair = 1 input for `bbduk_trim_paired.sh`, 1 FASTQ file = 1 input for `bbduk_trim_single.sh`:
    
 ```
 qsub bbduk_trim_run_parallel.pbs
@@ -200,7 +202,7 @@ You can check the quality of the data after trimming using:
 sh fastqc_trimmed_make_input.sh cohort.config
 ```
 
-Edit `qsub fastqc_run_parallel.pbs` by:
+Edit `fastqc_run_parallel.pbs` by:
    * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
    * Adjusting PBS directive compute requests, scaling to your input size (use your previous fastqc job as a guide)
 
@@ -210,12 +212,12 @@ qsub fastqc_trimmed_run_parallel.pbs
 
 ### 3. Mapping
 
-#### Preparing your references for STAR
+#### Preparing your reference for STAR
 
-Each reference under the "REFERENCE" column in your `<cohort>.config` file needs to be prepared with STAR before mapping. For most, this will only be one reference genome prepared once per project. 
+Each reference under the "REFERENCE" column in your `<cohort>.config` file needs to be prepared with STAR before mapping. For most, this will only be one reference genome, prepared once per project. 
 
 * Required inputs: reference genome in FASTA format (e.g. in `./Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa`) and annotation file in GTF format (e.g. `./Reference/GRCh38/Homo_sapiens.GRCh38.103.gtf`). The "REFERENCE" column in your cohort.config file is used to locate the subdirectory (GRCh38 in this example), so make sure they match!
-* Required parameters: overhang (read length - 1)
+* Required parameters: overhang (read length - 1). The default is 149 for 150 base pair reads.
 
 Edit the variables with the required inputs and parameters in `star_index.pbs` in the section shown below:
   
@@ -236,6 +238,40 @@ Submit the job:
 qsub star_index.pbs
 ```
 
+#### Mapping trimmed reads to prepared reference
+
+This step will map trimmed FASTQ files to a prepared reference genome using STAR
+
+* Required inputs: `cohort.config`, `../<dataset>_trimmed` containing trimmed FASTQ files
+    * "SAMPLEID" is used locate trimmed FASTQ in `../<dataset>_trimmed` and name output files
+    * "PLATFORM", "SEQUENCING_CENTRE" from `<cohort>.config`, and flowcell and lane from FASTQ sequence identifiers are used in BAM read group headers. 
+    * "RUN_TYPE_SINGLE_PAIRED" is used to indicate whether to map as single or paired reads
+* Outputs: Directory and output files prefixed `../<dataset>_STAR/${sampleid}_${lane}_`
+
+To map all trimmed reads for to references specified in your `<cohort>.config` file, prepare inputs for parallel processing by:
+  
+```
+sh star_align_trimmed_make_input.sh cohort.config
+```
+  
+`star_align_run_parallel.pbs` run task scripts `star_align_paired_with_unmapped.sh` and/or `star_align_single_with_unmapped.sh` by default and:
+  * Will output coordinate sorted BAMs
+  * Will output unmapped reads in FASTQ format (as pairs, if run type was paired)
+  
+Edit `star_align_run_parallel.pbs` by:
+   * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+   * Adjusting PBS directive compute requests, scaling to your input size
+        * Each `star_align_paired_with_unmapped.sh` task requires NCPUS=24, 96 GB mem and ~00:10:00 walltime to map 90 M pairs of FASTQ reads.
+        * For ~15 FASTQ pairs, 90 M pairs each, I recommend: `-l walltime=01:30:00,ncpus=240,mem=950GB,wd`, `-q normal`
+  
+Submit `star_align_run_parallel.pbs`. This launches parallel tasks for: 1 trimmed FASTQ pair = 1 input for `star_align_paired_with_unmapped.sh`, 1 trimmed FASTQ file = 1 input for `star_align_single_with_unmapped.sh`: 
+
+```
+qsub star_align_run_parallel.pbs
+```
+  
+#### Compress unmapped reads with pigz (optional)
+  
 ### 4. Merging lane level BAMs into sample level BAMs
 
 ### 5. Collect BAM QC metrics
