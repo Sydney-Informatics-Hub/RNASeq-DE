@@ -15,7 +15,9 @@
 
 # Description
 
-RNASeq-DE is a highly scalable workflow that pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. THe workflow was designed to efficiently process and manage large scale projects (100s of samples sequenced over multiple batches). In summary, the steps of this workflow include:
+RNASeq-DE is a highly scalable workflow that pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. The workflow was designed to efficiently process and manage large scale projects (100s of samples sequenced over multiple batches). 
+
+In summary, the steps of this workflow include:
 
 0. __Set up__
 1. __QC of raw FASTQs__: FastQC and MultiQC to obtain quality reports on raw fastq files
@@ -52,13 +54,13 @@ git clone https://github.com/Sydney-Informatics-Hub/RNASeq-DE
 cd RNASeq-DE
 ```
 
-__Provide the following__:
+### Required inputs and directory structure
 
-* __Raw FASTQ files__ into this directory, organised into dataset directories (e.g. Batch_1). Most sequencing companies will provide FASTQs in this structure.
-* __Reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in the relevant `Reference` sub-directory. References can be obtained:
+* __Raw FASTQ files__ organised into dataset directories. Most sequencing companies will provide FASTQs in this structure. 
+* __Reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in a sub-directory in `Reference`. References can be obtained:
     * following recommendations in the [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf). 
-    * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html) 
-    * SIH's CloudStor, which contains already genomes already indexed for STAR v2.7.3a (coming soon)!
+    * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html)
+* __Config file__: create using the [guide](#cohort.config) below.
 
 Your __RNASeq-DE__ directory structure should match the following:
 
@@ -79,6 +81,8 @@ Your __RNASeq-DE__ directory structure should match the following:
 ├── cohort.config
 └── Scripts
 ```
+
+### cohort.config
 
 The `cohort.config` file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files. An example is provided below:
 
