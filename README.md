@@ -84,7 +84,7 @@ Your __RNASeq-DE__ directory structure should match the following:
 └── Scripts
 ```
 
-### cohort.config
+#### cohort.config
 
 The `cohort.config` file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files. An example is provided below:
 
@@ -210,6 +210,31 @@ qsub fastqc_trimmed_run_parallel.pbs
 
 ### 3. Mapping
 
+#### Preparing your references for STAR
+
+Each reference under the "REFERENCE" column in your `<cohort>.config` file needs to be prepared with STAR before mapping. For most, this will only be one reference genome prepared once per project. 
+
+* Required inputs: reference genome in FASTA format (e.g. in `./Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa`) and annotation file in GTF format (e.g. `./Reference/GRCh38/Homo_sapiens.GRCh38.103.gtf`). The "REFERENCE" column in your cohort.config file is used to locate the subdirectory (GRCh38 in this example), so make sure they match!
+* Required parameters: overhang (read length - 1)
+
+Edit the variables with the required inputs and parameters in `star_index.pbs` in the section shown below:
+  
+```
+# Change dir, ref, gtf and overhang variables below
+dir=../Reference/GRCh38
+# ref and gtf files under dir
+ref=Homo_sapiens.GRCh38.dna.primary_assembly.fa
+gtf=Homo_sapiens.GRCh38.103.gtf
+# sjdbOverhang = ReadLength-1 (for creating splice junction database)
+overhang=149
+```
+The default compute parameters are sufficient for human, mouse or other similar genome.
+
+Submit the job:
+
+```
+qsub star_index.pbs
+```
 
 ### 4. Merging lane level BAMs into sample level BAMs
 
