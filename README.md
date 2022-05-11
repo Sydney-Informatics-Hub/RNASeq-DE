@@ -122,7 +122,7 @@ When you have completed [Set up](#set-up), change into the Scripts directory usi
 Generally, steps involve:
 1. Running a `<task>_make_input.sh` script to prepare for parallel processing.
    * This makes an inputs file, e.g. `./Inputs/<task>.inputs`
-   * This will often use your `<cohort>.config` file to know which files or samples you would like to process in parallel
+   * This will often use your `<cohort>.config` file to know which files or samples you would like to process in a single job
 2. Running a `<task>_run_parallel.pbs` script. 
    * This launches multiple tasks (e.g. `./Scripts/<task>.sh`) in parallel
    * Each line of `./Inputs/<task>.inputs` is used as input into a single `<task>.sh`
