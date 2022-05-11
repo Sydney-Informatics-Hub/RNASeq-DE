@@ -144,8 +144,9 @@ sh fastqc_make_input.sh cohort.config
 
 Edit `qsub fastqc_run_parallel.pbs` by:
    * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
-   * Adjusting PBS directive compute requests, scaling to your input size (consider number of tasks, size of FASTQ)
-      * Each task requires NCPU=1. 1 FASTQ file containing ~15 M reads takes about 00:05:00 in walltime. 
+   * Adjusting PBS directive compute requests, scaling to your input size
+      * Each `fastqc.sh` task requires NCPUS=1, 4 GB mem and ~00:30:00 walltime to process one FASTQ file with ~90 M reads. Scale walltime to number of expected reads per FASTQ.
+      * For ~100 FASTQ files (or 50 FASTQ pairs), I recommend `-l walltime=01:30:00,ncpus=48,mem=190GB,wd`, `-q normal`. This will allow processing of 48 tasks in parallel.
 
 Submit `qsub fastqc_run_parallel.pbs` to perform FastQC in parallel (1 fastq file = 1 `fastqc.sh` task) by:
    
@@ -181,18 +182,34 @@ sh bbduk_trim_make_input.sh cohort.config
 
 Edit `bbduk_trim_run_parallel.pbs` by:
    * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
-   * Adjusting PBS directive compute requests, scaling to your input size (consider number of tasks, size of FASTQ)
-      * NCPU=6
+   * Adjusting PBS directive compute requests, scaling to your input size 
+      * Each `bbduk_trim_paired.sh` task requires NCPU=6, 23 GB mem and ~00:19:00 walltime for 90 M pairs of FASTQ reads.
+      * For ~15 FASTQ pairs, 90 M pairs each, I recommend: `-l walltime=02:00:00,ncpus=48,mem=190GB,wd`, `-q normal`
 
-Submit `qsub bbduk_trim_run_parallel.pbs` to run bbduk.sh in parallel (1 FASTQ pair = 1 input for `bbduk_trim_paired.sh`, 1 FASTQ file = 1 input for `bbduk_trim_single.sh`):
+Submit `qsub bbduk_trim_run_parallel.pbs`. This launches parallel tasks for: 1 FASTQ pair = 1 input for `bbduk_trim_paired.sh`, 1 FASTQ file = 1 input for `bbduk_trim_single.sh`:
    
 ```
 qsub bbduk_trim_run_parallel.pbs
 ```
 
-QC of trimmed FASTQs
+#### QC of trimmed FASTQs (optional)
+
+You can check the quality of the data after trimming using:
+  
+```
+sh fastqc_trimmed_make_input.sh cohort.config
+```
+
+Edit `qsub fastqc_run_parallel.pbs` by:
+   * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+   * Adjusting PBS directive compute requests, scaling to your input size (use your previous fastqc job as a guide)
+
+```
+qsub fastqc_trimmed_run_parallel.pbs
+```
 
 ### 3. Mapping
+
 
 ### 4. Merging lane level BAMs into sample level BAMs
 
