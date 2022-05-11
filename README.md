@@ -15,7 +15,7 @@
 
 # Description
 
-RNASeq-DE is a scalable workflow that pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. In summary, the steps of this workflow include:
+RNASeq-DE is a highly scalable workflow that pre-processes RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. THe workflow was designed to efficiently process and manage large scale projects (100s of samples sequenced over multiple batches). In summary, the steps of this workflow include:
 
 0. __Set up__
 1. __QC of raw FASTQs__: FastQC and MultiQC to obtain quality reports on raw fastq files
@@ -52,11 +52,10 @@ git clone https://github.com/Sydney-Informatics-Hub/RNASeq-DE
 cd RNASeq-DE
 ```
 
-You will then need to include:
+__Provide the following__:
 
-* Your __Raw FASTQ files__ into this directory, organised into dataset directories (e.g. Batch_1). Most sequencing companies will provide FASTQs in this structure.
-    *  
-* Your __reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in the relevant `Reference` sub-directory. References can be obtained:
+* __Raw FASTQ files__ into this directory, organised into dataset directories (e.g. Batch_1). Most sequencing companies will provide FASTQs in this structure.
+* __Reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in the relevant `Reference` sub-directory. References can be obtained:
     * following recommendations in the [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf). 
     * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html) 
     * SIH's CloudStor, which contains already genomes already indexed for STAR v2.7.3a (coming soon)!
@@ -178,19 +177,17 @@ Submit `qsub bbduk_trim_run_parallel.pbs` to run bbduk.sh in parallel (1 FASTQ p
 qsub bbduk_trim_run_parallel.pbs
 ```
 
-The remainder of the guide is coming soon!
+QC of trimmed FASTQs
 
-### 3. QC of trimmed FASTQs
+### 3. Mapping
 
-### 4. Mapping
+### 4. Merging lane level BAMs into sample level BAMs
 
-### 5. Merging lane level BAMs into sample level BAMs
+### 5. Collect BAM QC metrics
 
-### 6. Collect BAM QC metrics
+### 6. Raw counts
 
-### 7. Raw counts
-
-### 8. Normalize counts
+### 7. Normalize counts
          
 # Benchmarking
 
