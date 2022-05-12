@@ -422,6 +422,46 @@ sh samtools_idxstats_final_bams.sh ../cohort_final_bams
 
 ### 6. Raw counts
 
+This step uses htseq-count to obtain count reads aligning to features in a genome.
+
+#### Sample counts
+ 
+* Required inputs: `cohort.config`, `cohort_final_bams/<sampleid>.final.bam` and ../Reference/GRCh38/*gtf file
+* Output: Per sample counts in `cohort_htseq-count/<sampleid>.counts`
+  
+To obtain counts from final BAMs for sample IDs in `cohort.config`, create input file for parallel processing:
+
+```
+# First edit the strand= variable if your libraries are not reverse strand aware!
+sh htseq-count_custom_make_input.sh cohort.config
+```
+Note: htseq-count_custom_make_input.sh will search for all .final.bam in cohort_final_bams, including sample flowcell level BAMs if available. To use only sample level bams, create inputs with `htseq-count_make_input.sh`
+
+ `htseq-count_run_parallel.pbs` will run task script `htseq-count.sh` with htseq-count recommended settings.
+  
+Edit `htseq-count_run_parallel.pbs` by:
+  * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+  * Adjusting PBS directive compute requests, scaling to your input size
+      * Each task requires NCPUS=1. Walltime will scale to the number of reads in a BAM file. A sample with 130 M paired reads requires ~04:00:00 walltime. A sample with 80 M paired reads requires ~02:20:00 walltime.
+
+#### Count matrix (optional)
+
+This step creates a standard count matrix file (genes = rows, sampleIDs = columns) using htseq-count output. All samples within your `.config` file that have `<sampleid>.counts` file available will be included in the final matrix. 
+  
+* Required inputs: `cohort.config`, used to locate `cohort_htseq-count` directory and <sampleid>.counts
+* Output: Count matrix file in `<cohort>_htseq-count/<cohort>.counts`
+
+For smaller cohorts (<100 samples), run on the login node:
+
+```
+perl htseq-count_make_matrix_custom.pl cohort.config
+```
+
+For very large cohorts (>100 samples), run as a job by editing `htseq-count_make_matrix_custom.pbs` by:
+  * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+  * Providing the `config=` variable the path to your cohort.config file
+  * For most cohorts, the default compute resources should be sufficient. Larger cohorts will require more memory.
+
 ### 7. Normalize counts
          
 # Benchmarking
