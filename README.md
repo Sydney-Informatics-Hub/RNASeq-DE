@@ -32,8 +32,8 @@ In summary, the steps of this workflow include:
     * Outputs: `<sampleid>.final.bam` and `<sampleid>_<flowcell>.final.bam` (and index files)
 5. __Mapping metrics__
     * RSeQC infer_experiment.py - check strand awareness, required for counting. Output: per sample reports which are summarized by cohort in `../QC_reports/<cohort>_final_bams_inter_experiment/<cohort>.txt`
-    * [Optional] RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR, but can be used on sample level BAMs).
     * RSeQC read_distribution.py - checks which features reads aligned to for each sample (summarized with multiqc). Expect ~30% of reads to align to CDS exons (provides total reads, total tags, total tags assigned. Groups by: CDS exons, 5' UTR, 3' UTR, Introns, TSS up and down regions). 
+    * [Optional] RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR, but can be used on sample level BAMs).
     * [Optional] `summarize_STAR_alignment_stats.pl`: collates per sample STAR metric per flowcell level BAM (use read_distribution for sample level BAMs). Uses datasets present in a cohort.config file to find these BAMs. Inputs: per sample `*Log.final.out`. Output: `../QC_reports/<cohort>_STAR_metrics.txt
     * [Optional] SAMtools idxstats: summarize number of reads per chromosome (useful for inferring gender, probably needs a bit more work)
 6. __Raw counts__: HTSeq
@@ -132,7 +132,7 @@ Generally, steps involve:
    * Each line of `./Inputs/<task>.inputs` is used as input into a single `<task>.sh`
    * __Compute resources__ should be scaled to the size of your data. Recommendations are provided in the user guide. [Benchmarking](#benchmarking) can also be used as a guide.
 
-The steps below explain how to process samples in `cohort.config`. Replace `cohort.config` with your own `.config` file.
+The steps below explain how to process samples in `cohort.config`. __Replace `cohort.config` with the path to your own `.config` file.__
    
 ### 1. QC of raw FASTQs
 
@@ -319,15 +319,50 @@ Edit `samtools_merge_index_run_parallel.pbs` by:
       * For non-multiplexed samples, allow NCPUS=1
       * For ~882 samples with an average of 80 M paired reads, including ~10 multiplexed, I suggest `-l walltime=5:00:00,ncpus=48,mem=190GB,wd`, `-q normal`
 
+Submit the job by:
+
+```
+qsub samtools_merge_index_run_parallel.pbs
+```
+
 ### 5. Mapping metrics
 
 #### RSeQC's infer_experiment.py
 
-This step uses RSeQC's infer_experiment.py to infer the library strand awareness (i.e. forward, reverse, or not strand aware) that was used to prepare the samples for sequencing. This is important for know reads should be counted using htseq-count. 
+This step uses RSeQC's infer_experiment.py to infer the library strand awareness (i.e. forward, reverse, or not strand aware) that was used to prepare the samples for sequencing. This is required for `htseq-count`. 
   
-* Required inputs: A directory of BAM files (e.g. `cohort_final_bams`) and a reference annotation file in BED format
+* Required inputs: A directory of BAM files (e.g. `cohort_final_bams`) and a reference annotation file in BED format (CLI tools such as [gtf2bed](https://github.com/ExpressionAnalysis/ea-utils/blob/master/clipper/gtf2bed) can convert GTF to BED format.
+* Outputs: 
+    * infer_experiment.py results per BAM as <sampleid>.txt or <sampleid>_<flowcell>.txt files
+    * One summary table for all BAMs for paired data in ../QC_reports/${outfileprefix}_infer_experiment/cohort_final_bams.txt with `#FILE REVERSE FORWARD` headers. REVERSE is the proportion of reads supporting reverse strand awareness (1-+,2++,2--) and FORWARD is the proportion of reads supporting forward strandawareness (1++,1--,2+-,2-+). 
+  
+The `infer_experiment_final_bams.sh` script processes multiple BAMs in parallel on the login node/command line. With the path to the directory containing `*final.bam` files, e.g. ../cohort_final_bams:
+  
+```
+sh infer_experiment_final_bams.sh ../cohort_final_bams
+```
   
 #### RSeQC's read_distribution.py
+
+This step uses RSeQC's read_distribution.py to check the distribution of aligned reads across features (e.g. exon, intron, UTR, intergenic, etc). 
+  
+  * Required inputs: `cohort.config`, <sampleid>.final.bam and reference annotation file in BED format
+  * Output: Per sample output in `../QC_reports/<cohort>_read_distribution/<sampleid>_read_distribution.txt`
+  
+To obtain `read_distribution.py reports` for sample BAMs in `cohort.config`, create input file for parallel processing:
+
+```
+sh read_distribution_make_input.sh cohort.config
+```
+`read_distribution_run_parallel.pbs` will run task scripts `read_distribution.sh` with `read_distribution.py` default settings applied.
+ 
+ Edit `read_distribution_run_parallel.pbs` by:
+  * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+  * Adjusting PBS directive compute requests, scaling to your input size
+      * Each task will only require NCPUS=1, ~00:25:00 walltime (1 BAM with ~80 M paired reads)
+      * For ~260 BAM files, ~80 M pairs of reads per sample, I suggest: `-l walltime=04:00:00,ncpus=56,mem=256GB,wd`, `-q normalbw`
+  
+#### RSeQC's bam_stat.py (optional)
 
 ### 6. Raw counts
 
