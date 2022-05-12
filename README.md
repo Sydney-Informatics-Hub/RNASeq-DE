@@ -462,13 +462,15 @@ For very large cohorts (>100 samples), run as a job by editing `htseq-count_make
   * Providing the `config=` variable the path to your cohort.config file
   * For most cohorts, the default compute resources should be sufficient. Larger cohorts will require more memory.
 
+Submit the job by:
+
+```
+qsub htseq-count_make_matrix_custom.pbs
+```
+
 ### 7. Normalize counts
          
 # Benchmarking
-
-The below metrics were obtained for a human cohort comprised of:
-* 96 FASTQ pairs
-* ~80 M paired reads (each read 150 bp length)
 
 | #JobName                              | CPUs_requested | CPUs_used | Mem_requested | Mem_used | CPUtime    | CPUtime_mins | Walltime_req | Walltime_used | Walltime_mins | JobFS_req | JobFS_used | Efficiency | Service_units(CPU_hours) | Job_exit_status | Date       | Time     |
 |---------------------------------------|----------------|-----------|---------------|----------|------------|--------------|--------------|---------------|---------------|-----------|------------|------------|--------------------------|-----------------|------------|----------|
