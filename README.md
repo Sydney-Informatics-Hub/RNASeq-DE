@@ -104,7 +104,7 @@ To create a `.config` using excel:
     * Either copy and paste the contents into a text editor in Gadi, or save as a tab-delimited text file in excel. 
     * The file must be suffixed with `.config` 
     * File prefix: This is used to name outputs. Use something meaningful (e.g. your cohort name) and avoid whitespace.
-    * Header lines must start with `#` and 
+    * Header lines must start with `#` 
    
 Column descriptions for __cohort.config__:
 
@@ -422,20 +422,21 @@ sh samtools_idxstats_final_bams.sh ../cohort_final_bams
 
 ### 6. Raw counts
 
-This step uses htseq-count to obtain count reads aligning to features in a genome.
+This step uses htseq-count to obtain aligned read counts present across features in a genome.
 
-#### Sample counts
+#### Counts per sample
  
-* Required inputs: `cohort.config`, `cohort_final_bams/<sampleid>.final.bam` and ../Reference/GRCh38/*gtf file
+* Required inputs: `cohort.config`, `cohort_final_bams/<sampleid>.final.bam` and `Reference/GRCh38/*gtf` file
 * Output: Per sample counts in `cohort_htseq-count/<sampleid>.counts`
   
-To obtain counts from final BAMs for sample IDs in `cohort.config`, create input file for parallel processing:
+To obtain counts from final BAMs for sample IDs in `cohort.config`:
+  * Edit the strand= variable in `htseq-count_custom_make_input.sh` if your libraries are not reverse strand aware!
+  * Create input file for parallel processing:
 
 ```
-# First edit the strand= variable if your libraries are not reverse strand aware!
 sh htseq-count_custom_make_input.sh cohort.config
 ```
-Note: htseq-count_custom_make_input.sh will search for all .final.bam in cohort_final_bams, including sample flowcell level BAMs if available. To use only sample level bams, create inputs with `htseq-count_make_input.sh`
+Note: `htseq-count_custom_make_input.sh` will search for all .final.bam in cohort_final_bams, including sample flowcell level BAMs if available. To use only sample level bams, create inputs with `htseq-count_make_input.sh`
 
  `htseq-count_run_parallel.pbs` will run task script `htseq-count.sh` with htseq-count recommended settings.
   
@@ -444,7 +445,7 @@ Edit `htseq-count_run_parallel.pbs` by:
   * Adjusting PBS directive compute requests, scaling to your input size
       * Each task requires NCPUS=1. Walltime will scale to the number of reads in a BAM file. A sample with 130 M paired reads requires ~04:00:00 walltime. A sample with 80 M paired reads requires ~02:20:00 walltime.
 
-#### Count matrix (optional)
+#### Cohort count matrix (optional)
 
 This step creates a standard count matrix file (genes = rows, sampleIDs = columns) using htseq-count output. All samples within your `.config` file that have `<sampleid>.counts` file available will be included in the final matrix. 
   
@@ -469,6 +470,47 @@ qsub htseq-count_make_matrix_custom.pbs
 ```
 
 ### 7. Normalize counts
+
+This step quantifies transcript abundance for genomic features (gene, transcript, exon, intron) as transcripts per million (TPM) normalized counts. 
+
+#### TPM counts per sample
+  
+* Required inputs: `cohort.config`, `Reference/GRCh38/*gtf` and `cohort_final_bams` directory containing indexed BAMs
+* Outputs: TPMCalculator outputs per input BAM in directory `cohort_TPMCalculator`
+  
+To obtain TPM normalized counts across features for samples in `cohort.config`, create input file by:
+* Providing the `gtf=` variable the path to your GTF file (by default this is `../Reference/GRCh38/Homo_sapiens.GRCh38.103.gtf`
+* Create the input file for parallel processing:
+
+```
+sh tpmcalculator_make_input.sh cohort.config
+```
+
+`tpmcalculator_run_parallel.pbs` will run task script `tpmcalculator.sh`. By default, this applies the TPMCalculator's developer's settings and addtional settings including:
+  * `-a` to print all features. Required for the next step, which collates sample TPM counts into a cohort count matrix
+  * `-p` use only properly paired reads. Recommended by the TPMCalculator developer
+  * `-e` extended output, to include transcript level TPM values
+  * `-q 255` apply minimum MAPQ value of 255 to filter reads. This value is [recommended by the developer](https://github.com/ncbi/TPMCalculator/issues/72) for STAR aligned BAMs 
+ 
+Edit `tpmcalculator_run_parallel.pbs` by:
+  * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+  * Adjusting PBS directive compute requests, scaling to your input size
+    * Each task requires NCPUS=1, 3-4 GB memory
+    * For 907 BAMs with ~80 M paired reads each, I suggest `-l walltime=8:00:00,ncpus=768,mem=3040GB,wd`, `-q normal`
+ 
+#### TPM cohort count matrix (optional)
+
+This step creates two TPM cohort count matricies, one at the gene level, the other at the transcript level.
+
+Edit the `tpmcalculator_make_matrix.pbs` script:
+  * Providing the `tpmdir=` variable the path to your TPMCalculator directory containing TPMCalculator outputs per sample
+  * Adjust memory if required. 54 GB memory was required for ~907 samples
+
+Run the script:
+
+```
+qsub tpmcalculator_make_matrix.pbs
+```
          
 # Benchmarking
 
