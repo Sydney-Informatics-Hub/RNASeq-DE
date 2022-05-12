@@ -121,7 +121,7 @@ Column descriptions for __cohort.config__:
 
 ## Running the pipeline
 
-When you have completed [Set up](#set-up), change into the Scripts directory using `cd Scripts` and run all scripts from here. 
+When you have completed [Set up](#set-up), change into the `Scripts` directory and run all scripts from here.
 
 Generally, steps involve:
 1. Running a `<task>_make_input.sh` script to prepare for parallel processing.
@@ -154,7 +154,7 @@ Edit `fastqc_run_parallel.pbs` by:
       * Each `fastqc.sh` task requires NCPUS=1, 4 GB mem and ~00:30:00 walltime to process one FASTQ file with ~90 M reads. Scale walltime to number of expected reads per FASTQ.
       * For ~100 FASTQ files (or 50 FASTQ pairs), I recommend `-l walltime=01:30:00,ncpus=48,mem=190GB,wd`, `-q normal`. This will allow processing of 48 tasks in parallel.
 
-Submit `qsub fastqc_run_parallel.pbs` to perform FastQC in parallel (1 fastq file = 1 `fastqc.sh` task) by:
+Submit `fastqc_run_parallel.pbs` to perform FastQC in parallel (1 fastq file = 1 `fastqc.sh` task) by:
    
 ```
 qsub fastqc_run_parallel.pbs
@@ -163,7 +163,7 @@ qsub fastqc_run_parallel.pbs
 Once `fastqc_run_parallel.pbs` is complete, you can summarize reports using:
 
 ```
-sh multiqc.sh ../dataset_fastQC`
+sh multiqc.sh ../dataset_fastQC
 ```
 
 ### 2. Trim raw FASTQs
@@ -349,20 +349,76 @@ This step uses RSeQC's read_distribution.py to check the distribution of aligned
   * Required inputs: `cohort.config`, <sampleid>.final.bam and reference annotation file in BED format
   * Output: Per sample output in `../QC_reports/<cohort>_read_distribution/<sampleid>_read_distribution.txt`
   
-To obtain `read_distribution.py reports` for sample BAMs in `cohort.config`, create input file for parallel processing:
+To obtain `read_distribution.py` reports for sample BAMs in `cohort.config`, create input file for parallel processing:
 
 ```
 sh read_distribution_make_input.sh cohort.config
 ```
-`read_distribution_run_parallel.pbs` will run task scripts `read_distribution.sh` with `read_distribution.py` default settings applied.
+`read_distribution_run_parallel.pbs` will run task script `read_distribution.sh` with `read_distribution.py` default settings applied.
  
  Edit `read_distribution_run_parallel.pbs` by:
   * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
   * Adjusting PBS directive compute requests, scaling to your input size
       * Each task will only require NCPUS=1, ~00:25:00 walltime (1 BAM with ~80 M paired reads)
       * For ~260 BAM files, ~80 M pairs of reads per sample, I suggest: `-l walltime=04:00:00,ncpus=56,mem=256GB,wd`, `-q normalbw`
+ 
+Once `read_distribution_run_parallel.pbs` is complete, you can summarize reports using:
+
+```
+sh multiqc.sh ../QC_reports/cohort_read_distribution
+```
   
 #### RSeQC's bam_stat.py (optional)
+  
+This step uses RSeQC's bam_stat.py to check alignment metrics of BAM files, including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc. 
+  
+  * Required inputs: `cohort.config` and `cohort_final_bams/<sampleid>.final.bam` files
+  * Output: Per sample output in `../QC_reports/<cohort>_final_bams_bam_stat/<sampleid>_bam_statc.txt`
+
+To obtain `bam_stat.py` reports for sample BAMs in `cohort.config`, create input file for parallel processing:
+
+```
+sh bam_stat_make_input.sh cohort.config
+```
+
+`bam_stat_run_parallel.pbs` will run task script `bam_stat.sh` with `bam_stat.py` default settings applied.
+
+Edit `bam_stat_run_parallel.pbs` by:
+  * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+  * Adjusting PBS directive compute requests, scaling to your input size
+      * Each task requires NCPUS=1
+      * For 907 BAMs with ~80 M pairs of reads, I suggest `-l walltime=04:00:00,ncpus=112,mem=512GB,wd`, `-q normalbw`
+
+Once `bam_stat_run_parallel.pbs` is complete, you can summarize reports using:
+
+```
+sh multiqc.sh ../QC_reports/cohort_final_bams_bam_stat
+```
+
+#### summarise_STAR_alignment_stats.pl
+ 
+The `summarise_STAR_alignment_stats.pl` script will collate mapping information from STAR output for each aligned file. 
+
+* Required inputs: `dataset_STAR/<sampleid>_<lane>_Log.final.out` files, obtained from mapping
+* Output: `QC_reports/cohort_STAR_metrics.txt`
+
+Run the following command on the login node, on the command line:
+
+```
+perl summarise_STAR_alignment_stats.pl cohort.config
+```
+#### SAMtools idxstats
+
+This step runs samtools idxstats for all BAMs in a directory, and summarize the reports with multiQC.
+
+* Required inputs: Directory with `.bam` files
+* Outputs: `QC_reports/<outfileprefix>_samtools_idxstats`
+
+Run this on the login node, providing the path to your directory containing BAM files, e.g.:
+  
+```
+sh samtools_idxstats_final_bams.sh ../cohort_final_bams
+```
 
 ### 6. Raw counts
 
