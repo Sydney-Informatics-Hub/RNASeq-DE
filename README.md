@@ -30,7 +30,7 @@ In summary, the steps of this workflow include:
 4. __Merge lane level to sample level BAMs__: SAMtools to merge and index sample BAMs
     * Merge multiplexed BAMs into sample level BAMs. For samples which are not multiplexed, files are renamed/symlinked for consistent file naming.
     * Outputs: `<sampleid>.final.bam` and `<sampleid>_<flowcell>.final.bam` (and index files)
-5. __QC of mapping__
+5. __Mapping metrics__
     * RSeQC infer_experiment.py - check strand awareness, required for counting. Output: per sample reports which are summarized by cohort in `../QC_reports/<cohort>_final_bams_inter_experiment/<cohort>.txt`
     * [Optional] RSeQC bam_stat.py - for each BAM, print QC metrics (numbers are read counts) including: Total records, QC failed, PCR dups, Non primary hits, unmapped, mapq, etc (similar metrics are provided by STAR, but can be used on sample level BAMs).
     * RSeQC read_distribution.py - checks which features reads aligned to for each sample (summarized with multiqc). Expect ~30% of reads to align to CDS exons (provides total reads, total tags, total tags assigned. Groups by: CDS exons, 5' UTR, 3' UTR, Introns, TSS up and down regions). 
@@ -61,7 +61,7 @@ Please provide the following files to run the workflow:
 * __Raw FASTQ files__ organised into dataset directories. Most sequencing companies will provide FASTQs in this structure. 
     * Only Illumina short read data is supported
     * FASTQ sequence identifier must follow the [standard Illumina format](https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm) `@<instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos>:<UMI> <read>:<is filtered>:<control number>:<index>`. 
-* __Reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in a sub-directory in `Reference`. References can be obtained:
+* __Reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in a sub-directory in `Reference`. Annotation in BED format is required for RSeQC's infer_experiment.py (CLI tools such as [gtf2bed.pl](https://github.com/ExpressionAnalysis/ea-utils/blob/master/clipper/gtf2bed) can convert GTF to BED format). References can be obtained:
     * following recommendations in the [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf). 
     * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html)
 * __.config file__: create using the [guide](#cohortconfig) below.
@@ -86,9 +86,9 @@ Your __RNASeq-DE__ directory structure should match the following:
 └── Scripts
 ```
 
-#### cohort.config
+#### .config
 
-The `cohort.config` file is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files. An example is provided below:
+The `.config` file is tab-delimited text file that is used to tell the scripts which samples to process, how to process them, and where it can locate relevant input files. An example is provided below:
 
 |#FASTQ|	SAMPLEID|	DATASET|	REFERENCE|	SEQUENCING_CENTRE|	PLATFORM|	RUN_TYPE_SINGLE_PAIRED|	LIBRARY|
 |------|---------|----------|------------------------|--------------------|-----------|-------------------------|--------|
@@ -96,13 +96,15 @@ The `cohort.config` file is used to tell the scripts which samples to process, h
 |sample1_2.fastq.gz|     SAMPLEID1|       Batch_1| GRCh38|  KCCG|    ILLUMINA|        PAIRED|  1|
 |sample2.fastq.gz|	SAMPLEID2|	Batch_2|	GRCm38|	KCCG|	ILLUMINA|	SINGLE|	1|
 
-To create a `cohort.config file` using excel:
+To create a `.config` using excel:
 
-* Open or copy template headers into excel. `cohort.config` is a tab-delimited text file
 * Use column descriptions below to help you populate your config file
-   * __All columns are required in this order and format__
-* Save your `cohort.config` file in the `RNASeq-DE` directory. 
-   * `cohort` is used to name output files and directories. Change the prefix of this file to something more meaningful.
+    * __All columns are required in this order and format__
+* Save your `.config` file in the `RNASeq-DE` directory. 
+    * Either copy and paste the contents into a text editor in Gadi, or save as a tab-delimited text file in excel. 
+    * The file must be suffixed with `.config` 
+    * File prefix: This is used to name outputs. Use something meaningful (e.g. your cohort name) and avoid whitespace.
+    * Header lines must start with `#` and 
    
 Column descriptions for __cohort.config__:
 
@@ -129,6 +131,8 @@ Generally, steps involve:
    * This launches multiple tasks (e.g. `./Scripts/<task>.sh`) in parallel
    * Each line of `./Inputs/<task>.inputs` is used as input into a single `<task>.sh`
    * __Compute resources__ should be scaled to the size of your data. Recommendations are provided in the user guide. [Benchmarking](#benchmarking) can also be used as a guide.
+
+The steps below explain how to process samples in `cohort.config`. Replace `cohort.config` with your own `.config` file.
    
 ### 1. QC of raw FASTQs
 
@@ -176,7 +180,7 @@ Task scripts `bbduk_trim_paired.sh` and `bbduk_trim_single.sh`are apply the foll
    * `trimpolya=${readlen}`, where `${readlen}` is the length of your sequencing reads, obtained from the FASTQ file (assumes all read lengths in a single FASTQ are equal)
    * NO quality trimming is applied
    
-To run BBDuk trim for all raw FASTQ files in your `cohort.config` file, create input file for parallel processing:
+To run BBDuk trim for FASTQ files in `cohort.config`, create input file for parallel processing:
 
 ```
 sh bbduk_trim_make_input.sh cohort.config
@@ -214,7 +218,7 @@ qsub fastqc_trimmed_run_parallel.pbs
 
 #### Preparing your reference for STAR
 
-Each reference under the "REFERENCE" column in your `<cohort>.config` file needs to be prepared with STAR before mapping. For most, this will only be one reference genome, prepared once per project. 
+Each reference under the "REFERENCE" column in `cohort.config` needs to be prepared with STAR before mapping. For most, this will only be one reference genome, prepared once per project. 
 
 * Required inputs: reference genome in FASTA format (e.g. in `./Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa`) and annotation file in GTF format (e.g. `./Reference/GRCh38/Homo_sapiens.GRCh38.103.gtf`). The "REFERENCE" column in your cohort.config file is used to locate the subdirectory (GRCh38 in this example), so make sure they match!
 * Required parameters: overhang (read length - 1). The default is 149 for 150 base pair reads.
@@ -240,21 +244,21 @@ qsub star_index.pbs
 
 #### Mapping trimmed reads to prepared reference
 
-This step will map trimmed FASTQ files to a prepared reference genome using STAR
+This step will map trimmed FASTQ files to a prepared reference genome using STAR.
 
 * Required inputs: `cohort.config`, `../<dataset>_trimmed` containing trimmed FASTQ files
     * "SAMPLEID" is used locate trimmed FASTQ in `../<dataset>_trimmed` and name output files
-    * "PLATFORM", "SEQUENCING_CENTRE" from `<cohort>.config`, and flowcell and lane from FASTQ sequence identifiers are used in BAM read group headers. 
+    * "PLATFORM", "SEQUENCING_CENTRE" from `.config`, and flowcell and lane from FASTQ sequence identifiers are used in BAM read group headers. 
     * "RUN_TYPE_SINGLE_PAIRED" is used to indicate whether to map as single or paired reads
 * Outputs: Directory and output files prefixed `../<dataset>_STAR/${sampleid}_${lane}_`
 
-To map all trimmed reads for to references specified in your `<cohort>.config` file, prepare inputs for parallel processing by:
+To map all trimmed reads for to references specified in `cohort.config` file, prepare inputs for parallel processing by:
   
 ```
 sh star_align_trimmed_make_input.sh cohort.config
 ```
   
-`star_align_run_parallel.pbs` run task scripts `star_align_paired_with_unmapped.sh` and/or `star_align_single_with_unmapped.sh` by default and:
+`star_align_run_parallel.pbs` run task scripts `star_align_paired.sh` and/or `star_align_single.sh` and by default:
   * Will output coordinate sorted BAMs
   * Will output unmapped reads in FASTQ format (as pairs, if run type was paired)
   
@@ -272,9 +276,58 @@ qsub star_align_run_parallel.pbs
   
 #### Compress unmapped reads with pigz (optional)
   
+STAR outputs unmapped reads as unzipped FASTQ files. To save disk, we can compress these files using pigz. 
+
+* Required inputs: STAR unmapped FASTQ files. Filenames end in "*Unmapped.out.mate1", "*Unmapped.out.mate2"
+* Outputs: STAR unmapped gzipped FASTQ files. Filenames end in "*Unmapped.out.mate1.gz", "*Unmapped.out.mate2.gz"
+  
+To do this, edit `pigz_run_parallel.pbs` by:
+  * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+  * This script also creates inputs for parallel processing. By default, it will search for all unmapped STAR files using STAR's file naming convention. You may want to check the find commands on the command line for your version of STAR.
+  *  Adjusting PBS directive compute requests, scaling to your input size
+    * For ~200 unmapped files (or ~100 pairs), I suggest `-l walltime=02:00:00,ncpus=28,mem=128GB,wd`, `-q normalbw`
+
+The task `pigz.sh` will delete the original file by default.
+  
+Submit your job by:
+
+```
+qsub pigz_run_parallel.pbs
+```
+  
 ### 4. Merging lane level BAMs into sample level BAMs
 
-### 5. Collect BAM QC metrics
+This step merges sample lane level BAMs into sample level BAMs (skipped if samples were not multiplexed). All final BAMs are organised into `cohort_final_bam` directory and are then indexed with SAMtools.
+
+* Required inputs: `cohort.config` and sample BAMs in `*STAR` directories
+  * A unique list of sample IDs are taken from `cohort.config`
+* Outputs: Final BAMs in `cohort_final_bam/<sampleid>.final.bam` and index files `cohort_final_bam/<sampleid>.final.bam.bai`
+  * For samples that were not multiplexed, STAR bams are symlinked into the `cohort_final_bam` directory.
+  * For multiplexed samples, a sample level and flowcell level (symlinked) BAM will be created in the `cohort_final_bam` directory. Flowcell level BAMs are useful for checking technical batch effects.
+
+To obtain final BAMs for sample IDs in `cohort.config`, create input file for parallel processing:
+
+```
+sh samtools_merge_index_make_input.sh cohort.config
+```
+
+Edit `samtools_merge_index_run_parallel.pbs` by:
+  * Replacing PBS directive parameters, specifically <project> with your NCI Gadi project short code
+  * Adjusting PBS directive compute requests, scaling to your input size 
+      * This will be highly dependant on how many samples in your cohort are multiplexed
+      * For multiplexed samples, allow NCPUS=3
+      * For non-multiplexed samples, allow NCPUS=1
+      * For ~882 samples with an average of 80 M paired reads, including ~10 multiplexed, I suggest `-l walltime=5:00:00,ncpus=48,mem=190GB,wd`, `-q normal`
+
+### 5. Mapping metrics
+
+#### RSeQC's infer_experiment.py
+
+This step uses RSeQC's infer_experiment.py to infer the library strand awareness (i.e. forward, reverse, or not strand aware) that was used to prepare the samples for sequencing. This is important for know reads should be counted using htseq-count. 
+  
+* Required inputs: A directory of BAM files (e.g. `cohort_final_bams`) and a reference annotation file in BED format
+  
+#### RSeQC's read_distribution.py
 
 ### 6. Raw counts
 
