@@ -12,10 +12,11 @@
   - [3rd party Tutorials](#3rd-party-tutorials)
   - [Licence(s)](#licences)
   - [Acknowledgements/citations/credits](#acknowledgementscitationscredits)
-
+  - [References](#References)
+  
 # Description
 
-RNASeq-DE is a highly scalable workflow that pre-processes Illumina RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. The workflow was designed to efficiently process and manage large scale projects (100s of samples sequenced over multiple batches). 
+RNASeq-DE is a __highly scalable__ workflow that pre-processes Illumina RNA sequencing data for differential expression (raw FASTQ to counts) on the __National Compute Infrastructure, Gadi__. The workflow was designed to efficiently process and manage large scale projects (100s of samples sequenced over multiple batches). 
 
 In summary, the steps of this workflow include:
 
@@ -47,7 +48,7 @@ In summary, the steps of this workflow include:
 
 ## Set up
 
-The scripts in this repository use relative paths and require careful setup to ensure that scripts can locate input files seamlessly. To start, go to your working directory (e.g. /scratch/ab1 for your ab1 project on NCI Gadi) and:
+The scripts in this repository use relative paths and require careful setup to ensure that scripts can locate input files seamlessly. To start:
 
 ```
 git clone https://github.com/Sydney-Informatics-Hub/RNASeq-DE
@@ -58,13 +59,16 @@ cd RNASeq-DE
 
 Please provide the following files to run the workflow:
 
-* __Raw FASTQ files__ organised into dataset directories. Most sequencing companies will provide FASTQs in this structure. 
-    * Only Illumina short read data is supported
+* __Illumina raw FASTQ files__ 
+    * Organised into dataset/sequencing batch directories. Most sequencing companies will provide FASTQs in this structure. No other directory structure is supported.
     * FASTQ sequence identifier must follow the [standard Illumina format](https://support.illumina.com/help/BaseSpace_OLH_009008/Content/Source/Informatics/BS/FileFormat_FASTQ-files_swBS.htm) `@<instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos>:<UMI> <read>:<is filtered>:<control number>:<index>`. 
-* __Reference files__. Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in a sub-directory in `Reference`. Annotation in BED format is required for RSeQC's infer_experiment.py (CLI tools such as [gtf2bed.pl](https://github.com/ExpressionAnalysis/ea-utils/blob/master/clipper/gtf2bed) can convert GTF to BED format). References can be obtained:
-    * following recommendations in the [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf). 
-    * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html)
-* __.config file__: create using the [guide](#cohortconfig) below.
+* __Reference files__
+    *  Reference genome primary assembly (.fasta) and corresponding annotation (.gtf) file needs to be in a sub-directory in `Reference`. 
+    *  Annotation in BED format is required for RSeQC's infer_experiment.py (CLI tools such as [gtf2bed.pl](https://github.com/ExpressionAnalysis/ea-utils/blob/master/clipper/gtf2bed) can convert GTF to BED format). 
+    *  References can be obtained:
+      * following recommendations in the [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf). 
+      * from [Ensembl](https://asia.ensembl.org/info/data/ftp/index.html)
+* __.config file__: created using the [guide](#cohortconfig) below.
 
 Your __RNASeq-DE__ directory structure should match the following:
 
@@ -100,7 +104,7 @@ To create a `.config` using excel:
 
 * Use column descriptions below to help you populate your config file
     * __All columns are required in this order and format__
-* Save your `.config` file in the `RNASeq-DE` directory. 
+* Save your `.config` file in the `RNASeq-DE` directory on Gadi.
     * Either copy and paste the contents into a text editor in Gadi, or save as a tab-delimited text file in excel. 
     * The file must be suffixed with `.config` 
     * File prefix: This is used to name outputs. Use something meaningful (e.g. your cohort name) and avoid whitespace.
@@ -121,7 +125,7 @@ Column descriptions for __cohort.config__:
 
 ## Running the pipeline
 
-When you have completed [Set up](#set-up), change into the `Scripts` directory and run all scripts from here.
+Run all scripts from the `Scripts` directory once you have completed [set up](#set-up).
 
 Generally, steps involve:
 1. Running a `<task>_make_input.sh` script to prepare for parallel processing.
@@ -130,7 +134,7 @@ Generally, steps involve:
 2. Running a `<task>_run_parallel.pbs` script. 
    * This launches multiple tasks (e.g. `./Scripts/<task>.sh`) in parallel
    * Each line of `./Inputs/<task>.inputs` is used as input into a single `<task>.sh`
-   * __Compute resources__ should be scaled to the size of your data. Recommendations are provided in the user guide. [Benchmarking](#benchmarking) can also be used as a guide.
+   * __Compute resources__ should be scaled to the size of your data. Recommendations are provided in the user guide.
 
 The steps below explain how to process samples in `cohort.config`. __Replace `cohort.config` with the path to your own `.config` file.__
    
@@ -501,6 +505,9 @@ Edit `tpmcalculator_run_parallel.pbs` by:
 #### TPM cohort count matrix (optional)
 
 This step creates two TPM cohort count matricies, one at the gene level, the other at the transcript level.
+  
+  * Required inputs: Directory containing sample level TPMCalculator outputs
+  * Output: `TPM_GeneLevel.counts` and `TPM_TranscriptLEvel.counts` in the input directory provided
 
 Edit the `tpmcalculator_make_matrix.pbs` script:
   * Providing the `tpmdir=` variable the path to your TPMCalculator directory containing TPMCalculator outputs per sample
@@ -552,7 +559,7 @@ qsub tpmcalculator_make_matrix.pbs
 
 ## Component tools
 
-The software listed below are used in the RNASeq-DE pipeline. Some of these are installed globally on NCI Gadi (check with `module avail` for the current software). Install python3 packages by `module load python3/3.8.5`, and then using the `pip3 install` commands as listed below. These will be installed in `$HOME`. All other software need to be installed in your project's `/scratch` directory and module loadable. 
+The software listed below are used in the RNASeq-DE pipeline. Some of these are installed globally on NCI Gadi (check with `module avail` for the current software). Install python3 packages by `module load python3/3.8.5`, and then using the `pip3 install` commands. These will be installed in `$HOME`. All other software need to be installed in your project's `/scratch` directory and module loadable. 
 
 openmpi/4.0.2 (installed globally)
 
@@ -562,12 +569,6 @@ SAMtools/1.10 (installed globally)
 
 python3/3.8.5 (installed globally)
 
-pip3 install multiqc
-
-pip3 install RSeQC
-
-pip3 install HTSeq
-
 fastQC/0.11.7
 
 BBDuk/37.98
@@ -575,8 +576,6 @@ BBDuk/37.98
 STAR/2.7.3a
 
 rseqc/4.0.0
-
-samtools/1.10
 
 bamtools/2.5.1, TPMCalculator/0.0.4
 
@@ -597,18 +596,36 @@ GNU General Public License v3.0
 
 # Acknowledgements/citations/credits
 
-### Authors 
+## Authors 
 
 - Tracy Chew (Sydney Informatics Hub, University of Sydney)
 - Rosemarie Sadsad
 
-### Acknowledgements 
+## Acknowledgements 
 Acknowledgements (and co-authorship, where appropriate) are an important way for us to demonstrate the value we bring to your research. Your research outcomes are vital for ongoing funding of the Sydney Informatics Hub and national compute facilities. We suggest including the following acknowledgement in any publications that follow from this work:
 
 The authors acknowledge the technical assistance provided by the Sydney Informatics Hub, a Core Research Facility of the University of Sydney and the Australian BioCommons which is enabled by NCRIS via Bioplatforms Australia.
 
 Documentation was created following the [Australian BioCommons documentation guidelines](https://github.com/AustralianBioCommons/doc_guidelines).
 
-# Cite us to support us!
+## Cite us to support us!
 
  Chew, T., & Sadsad, R. (2022). RNASeq-DE (Version 1.0) [Computer software]. https://doi.org/10.48546/workflowhub.workflow.152.1
+ 
+# References
+
+Anders, S., Pyl, P.T., Huber, W., 2014. HTSeq--a Python framework to work with high-throughput sequencing data. Bioinformatics. https://doi.org/10.1093/bioinformatics/btu638
+
+Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]
+
+BBMap - Bushnell B. - sourceforge.net/projects/bbmap/
+
+Dobin, A., Davis, C.A., Schlesinger, F., Drenkow, J., Zaleski, C., Jha, S., Batut, P., Chaisson, M., Gingeras, T.R., 2012. STAR: ultrafast universal RNA-seq aligner. Bioinformatics. https://doi.org/10.1093/bioinformatics/bts635
+  
+Ewels, P., Magnusson, M., Lundin, S., Käller, M., 2016. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. https://doi.org/10.1093/bioinformatics/btw354
+  
+Li H., Handsaker B., Wysoker A., Fennell T., Ruan J., Homer N., Marth G., Abecasis G., Durbin R., & 1000 Genome Project Data Processing Subgroup. 2009. The Sequence Alignment/Map format and SAMtools. Bioinformatics (Oxford, England), 25(16), 2078–2079. https://doi.org/10.1093/bioinformatics/btp352
+
+Vera Alvarez, R., Pongor, L.S., Mariño-Ramírez, L., Landsman, D., 2018. TPMCalculator: one-step software to quantify mRNA abundance of genomic features. Bioinformatics. https://doi.org/10.1093/bioinformatics/bty896
+  
+Wang, L., Wang, S., Li, W., 2012. RSeQC: quality control of RNA-seq experiments. Bioinformatics. https://doi.org/10.1093/bioinformatics/bts356
