@@ -545,7 +545,7 @@ qsub tpmcalculator_make_matrix.pbs
 
 |metadata field     | workflow_name / workflow_version  |
 |-------------------|:---------------------------------:|
-|Version            | 1.0                 |
+|Version            | 1.0.0                 |
 |Maturity           | stable                            |
 |Creators           | Tracy Chew                 |
 |Source             | NA                                |
