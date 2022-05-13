@@ -2,6 +2,8 @@
 
   - [Description](#description)
   - [User guide](#user-guide)
+      - [Set up](#set-up)
+      - [Running the pipeline](#running-the-pipeline)  
   - [Benchmarking](#benchmarking)
   - [Workflow summaries](#workflow-summaries)
       - [Metadata](#metadata)
