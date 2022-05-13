@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 set -e
 
@@ -21,20 +21,17 @@ set -e
 #
 #########################################################
 
-#PBS -P <project>
-#PBS -N tpmtranscript_matrix
-#PBS -l walltime=05:00:00,ncpus=1,mem=96GB,wd
-#PBS -q express
-#PBS -W umask=022
-#PBS -l storage=scratch/<project>
-#PBS -l wd
-#PBS -o ./Logs/tpmtranscript_matrix.o
-#PBS -e ./Logs/tpmtranscript_matrix.e
+sampleid=`echo $1 | cut -d ',' -f 1`
+bam=`echo $1 | cut -d ',' -f 2`
+gtf=`echo $1 | cut -d ',' -f 3`
+logfile=`echo $1 | cut -d ',' -f 4`
+outdir=`echo $1 | cut -d ',' -f 5`
 
-tpmdir=../PREDICT-19_FEB22_FULL_TPMCalculator_transcript
+echo "$(date): Running TPMCalculator to obtain TPM normalized counts. Sample ID:${sampleid}, BAM:${bam}, GTF: ${gtf}, Log file:${logfile}, Out:${outdir}" > ${logfile} 2>&1
 
-# Create TPM transcript count matrix
-perl ./tpmcalculator_transcript_make_matrix.pl $tpmdir
+cd ${outdir}
 
-# Create TPM gene count matrix
-perl ./tpmcalculator_make_matrix.pl $tpmdir
+TPMCalculator -a -p -e \
+	-q 255 \
+	-g ${gtf} \
+	-b ${bam} 2>>${logfile} 

@@ -48,10 +48,9 @@ SCRIPT=./pigz.sh
 # CREATE INPUTS - CHANGE AS REQUIRED
 # 1 file per line
 # Paths must be relative to Scripts directory
-
-ls -1 ../path/to/STAR/*Unmapped.out.mate* > ${INPUTS}
-#find .. -name "*Unmapped.out.mate1" > ${INPUTS}
-#find .. -name "*Unmapped.out.mate2" >> ${INPUTS}
+#ls -1 ../path/to/STAR/*Unmapped.out.mate* > ${INPUTS}
+find .. -name "*Unmapped.out.mate1" > ${INPUTS}
+find .. -name "*Unmapped.out.mate2" >> ${INPUTS}
 
 
 #########################################################

@@ -19,16 +19,19 @@ set -e
 # Infrastructure (NCI), which is supported by the Australian Government
 # with access facilitated by the University of Sydney.
 #
-# Description: Performs adapter and polyA tail trimming.
+#########################################################
+
+# Description: Performs adapter and polyA tail trimming 
 # Runs bbduk_trim_paired.sh in parallel if bbduk_trim_paired.inputs exists.
 # Runs bbduk_trim_single.sh in parallel if bbduk_trim_single.inputs exists.
 # Will automatically look for either input file.
-#
-#########################################################
+# For 15 FASTQ pairs, ~80 M reads each, use
+# -l walltime=02:00:00,ncpus=48,mem=190GB,wd
+# -q normal
 
 #PBS -P <project>
 #PBS -N bbduk_trim
-#PBS -l walltime=04:00:00,ncpus=48,mem=190GB,wd
+#PBS -l walltime=02:00:00,ncpus=48,mem=190GB,wd
 #PBS -q normal
 #PBS -W umask=022
 #PBS -l storage=scratch/<project>
@@ -41,14 +44,18 @@ module load bbtools/37.98
 
 mkdir -p ./Logs
 
-# M = Number of processes per node
 # NCPUs = CPUs per task
 NCPUS=6
-M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
 
 INPUTS=./Inputs
 paired=${INPUTS}/bbduk_trim_paired.inputs
 single=${INPUTS}/bbduk_trim_single.inputs
+
+#########################################################
+# Do not edit below this line
+#########################################################
+
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS )) #tasks per node
 
 if [ -s ${paired} ]
 then

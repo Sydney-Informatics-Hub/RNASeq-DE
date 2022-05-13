@@ -29,12 +29,12 @@ fi
 
 config=$1
 cohort=$(basename $config | cut -d'.' -f1)
-logdir=../Scripts/Logs/TPMCalculator_transcript
+logdir=../Scripts/Logs/TPMCalculator
 gtf=../Reference/GRCh38/Homo_sapiens.GRCh38.103.gtf
 INPUTS=./Inputs
-input_file=${INPUTS}/tpmcalculator_transcript.inputs
+input_file=${INPUTS}/tpmcalculator.inputs
 bamdir=../${cohort}_final_bams
-outdir=../${cohort}_TPMCalculator_transcript
+outdir=../${cohort}_TPMCalculator
 
 mkdir -p ${INPUTS} ${logdir} ${outdir}
 

@@ -40,7 +40,10 @@ module load python3/3.8.5
 export PYTHONPATH=$HOME/.local/lib/python3.8/site-packages
 
 mkdir -p ./Logs
+
+# NCPUS per task
 NCPUS=1
+
 SCRIPT=./htseq-count.sh
 INPUTS=./Inputs/htseq-count.inputs
 

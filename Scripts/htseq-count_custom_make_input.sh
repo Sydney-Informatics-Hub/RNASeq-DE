@@ -32,6 +32,9 @@ fi
 config=$1
 cohort=$(basename $config | cut -d'.' -f1)
 logdir=./Logs/htseq-count
+
+# Please change according to your library 
+# RSeQC's infer_experiment.py can be used to infer strandawareness
 strand=reverse
 gtf=$(ls ../Reference/GRCh38/*gtf)
 INPUTS=./Inputs

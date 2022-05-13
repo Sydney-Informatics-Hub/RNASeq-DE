@@ -27,7 +27,7 @@ set -e
 
 #PBS -P <project>
 #PBS -N bam_stat
-#PBS -l walltime=10:00:00,ncpus=112,mem=512GB,wd
+#PBS -l walltime=04:00:00,ncpus=112,mem=512GB,wd
 #PBS -q normalbw
 #PBS -W umask=022
 #PBS -l storage=scratch/<project>
@@ -39,7 +39,10 @@ module load nci-parallel/1.0.0a
 module load python3/3.9.2
 
 mkdir -p ./Logs
+
+# NCPUS per task
 NCPUS=1
+
 SCRIPT=./bam_stat.sh
 INPUTS=./Inputs/bam_stat.inputs
 
@@ -56,4 +59,3 @@ mpirun --np $((M * PBS_NCPUS / PBS_NCI_NCPUS_PER_NODE)) \
         nci-parallel \
         --verbose \
         --input-file ${PBS_JOBFS}/input-file
-

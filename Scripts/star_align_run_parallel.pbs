@@ -31,7 +31,7 @@ set -e
 
 #PBS -P <project>
 #PBS -N star_align_trimmed_with_unmapped
-#PBS -l walltime=24:00:00,ncpus=240,mem=950GB,wd
+#PBS -l walltime=01:30:00,ncpus=240,mem=950GB,wd
 #PBS -q normal
 #PBS -W umask=022
 #PBS -l storage=scratch/<project>
@@ -44,21 +44,22 @@ module load star/2.7.3a
 
 mkdir -p ./Logs
 
-# M = Number of tasks per node
 # NCPUs = CPUs per task
 NCPUS=24
-M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS ))
 
 INPUTS=./Inputs
 paired=${INPUTS}/star_align_paired.inputs
 single=${INPUTS}/star_align_single.inputs
 
-PAIRED_SCRIPT=./star_align_paired_with_unmapped.sh
-SINGLE_SCRIPT=./star_align_single_with_unmapped.sh
+PAIRED_SCRIPT=./star_align_paired.sh
+SINGLE_SCRIPT=./star_align_single.sh
 
 #########################################################
 # Do not edit below this line
 #########################################################
+
+# Number of tasks per node
+M=$(( PBS_NCI_NCPUS_PER_NODE / NCPUS ))
 
 if [ -s ${paired} ]
 then

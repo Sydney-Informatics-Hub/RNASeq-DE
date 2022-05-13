@@ -36,11 +36,10 @@ set -e
 # Future: Run samples separately, although not too bad now
 # ~882 samples including ~10 multiplexed, use
 # #PBS -l walltime=05:00:00,ncpus=48,mem=190GB,wd
-# USE NCPU=3 IN NEXT RUN
 
 #PBS -P <project>
 #PBS -N samtools_merge_index
-#PBS -l walltime=10:00:00,ncpus=48,mem=190GB,wd
+#PBS -l walltime=5:00:00,ncpus=48,mem=190GB,wd
 #PBS -q normal
 #PBS -W umask=022
 #PBS -l storage=scratch/<project>
@@ -52,6 +51,8 @@ module load nci-parallel/1.0.0a
 module load samtools/1.10
 
 mkdir -p ./Logs
+
+# NCPUS per task
 NCPUS=3
 SCRIPT=./samtools_merge_index.sh
 INPUTS=./Inputs/samtools_merge_index.inputs

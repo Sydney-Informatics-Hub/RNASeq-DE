@@ -30,8 +30,8 @@ set -e
 
 #PBS -P <project>
 #PBS -N read_distribution
-#PBS -l walltime=10:00:00,ncpus=144,mem=570GB,wd
-#PBS -q normal
+#PBS -l walltime=04:00:00,ncpus=56,mem=256GB,wd
+#PBS -q normalbw
 #PBS -W umask=022
 #PBS -l storage=scratch/<project>
 #PBS -o ./Logs/read_distribution.o
@@ -42,6 +42,8 @@ module load nci-parallel/1.0.0a
 module load python3/3.9.2
 
 mkdir -p ./Logs
+
+# NCPUS per task
 NCPUS=1
 SCRIPT=./read_distribution.sh
 INPUTS=./Inputs/read_distribution.inputs

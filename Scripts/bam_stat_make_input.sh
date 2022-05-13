@@ -32,7 +32,7 @@ cohort=$(basename $config | cut -d'.' -f1)
 logdir=./Logs/bam_stat
 INPUTS=./Inputs
 input_file=${INPUTS}/bam_stat.inputs
-outdir=../${cohort}_final_bams
+outdir=../QC_reports/${cohort}_final_bams
 
 mkdir -p ${INPUTS} ${logdir}
 

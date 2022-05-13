@@ -21,7 +21,7 @@ set -e
 #
 #########################################################
 
-# Description: Indexes a genome with STAR
+# Description: Prepare a reference genome for mapping with STAR
 # Usage: Replace <> with your project requirements and where specified.
 # Adjust compute resources using the guide below. Then:
 # qsub star_index.pbs
@@ -46,12 +46,13 @@ module load star/2.7.3a
 
 mkdir -p ./Logs
 
-# Change input variables
+# Change dir, ref, gtf and overhang variables below
 dir=../Reference/GRCh38
-# ref and gtf expected in dir
+# ref and gtf files under dir
 ref=Homo_sapiens.GRCh38.dna.primary_assembly.fa
 gtf=Homo_sapiens.GRCh38.103.gtf
-overhang=149 # sjdbOverhang = ReadLength-1 (for creating splice junction database)
+# sjdbOverhang = ReadLength-1 (for creating splice junction database)
+overhang=149
 
 STAR \
 	--runThreadN ${PBS_NCPUS} \

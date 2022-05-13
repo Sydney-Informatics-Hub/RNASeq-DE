@@ -41,7 +41,10 @@ module load nci-parallel/1.0.0a
 module load fastqc/0.11.7
 
 mkdir -p ./Logs
+
+# NCPUS per task
 NCPUS=1
+
 INPUTS=./Inputs/fastqc_trimmed.inputs
 SCRIPT=./fastqc.sh
 

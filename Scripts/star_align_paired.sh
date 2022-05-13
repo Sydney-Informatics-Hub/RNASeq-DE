@@ -22,6 +22,9 @@ set -e
 #########################################################
 
 # Align paired reads to the reference genome using STAR
+# Flags below will retain unmapped reads (as paired reads)
+# 	--outReadsUnmapped Fastx \
+#	--outSAMunmapped Within KeepPairs \
 
 filename=`echo $1 | cut -d ',' -f 1`
 dataset=`echo $1 | cut -d ',' -f 2`
@@ -41,11 +44,15 @@ echo `date` ": Mapping with STAR. Sample:$sampleid R1:$fastq1 R2: $fastq2 centre
 
 # Mapping
 STAR \
-	--runThreadN ${NCPUS} \
-	--genomeDir ${ref} \
-	--quantMode GeneCounts \
-	--readFilesCommand zcat \
-	--readFilesIn ${trimmed1} ${trimmed2} \
-	--outSAMattrRGline ID:${flowcell}:${lane} PU:${flowcell}.${lane}.${sampleid} SM:${sample} PL:${platform} CN:${seqcentre} LB:${library} \
-	--outSAMtype BAM SortedByCoordinate \
-	--outFileNamePrefix ${outdir}/${sampleid}_${lane}_ >> ${logfile} 2>&1
+        --runThreadN ${NCPUS} \
+        --outBAMsortingThreadN ${NCPUS} \
+        --genomeDir ${ref} \
+        --outBAMsortingBinsN 100 \
+        --quantMode GeneCounts \
+        --readFilesCommand zcat \
+        --readFilesIn ${fastq1} ${fastq2} \
+        --outSAMattrRGline ID:${flowcell}:${lane} PU:${flowcell}.${lane}.${sampleid} SM:${sample} PL:${platform} CN:${seqcentre} LB:${library} \
+        --outSAMtype BAM SortedByCoordinate \
+        --outReadsUnmapped Fastx \
+        --outSAMunmapped Within KeepPairs \
+        --outFileNamePrefix ${outdir}/${sampleid}_${lane}_ >> ${logfile} 2>&1
