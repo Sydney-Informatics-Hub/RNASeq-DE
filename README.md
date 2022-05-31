@@ -182,7 +182,7 @@ This step trims raw FASTQ files using BBDuk trim.
 * Outputs: Directory `../<dataset>_trimmed` containing trimmed FASTQ files
    
 Task scripts `bbduk_trim_paired.sh` and `bbduk_trim_single.sh`are apply the following settings by default:
-   *  Recommendated parameters under the "Adapter Trimming" example on the [BBDuk Guide](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/) are used
+   *  Recommendated parameters under the "Adapter Trimming" example on the [BBDuk Guide](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) are used
    * `trimpolya=${readlen}`, where `${readlen}` is the length of your sequencing reads, obtained from the FASTQ file (assumes all read lengths in a single FASTQ are equal)
    * NO quality trimming is applied
    
