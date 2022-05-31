@@ -573,6 +573,8 @@ python3/3.8.5 (installed globally)
 
 fastQC/0.11.7
 
+multiqc/1.9
+
 BBDuk/37.98
 
 STAR/2.7.3a
