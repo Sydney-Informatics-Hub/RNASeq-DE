@@ -620,7 +620,9 @@ Documentation was created following the [Australian BioCommons documentation gui
 
 Anders, S., Pyl, P.T., Huber, W., 2014. HTSeq--a Python framework to work with high-throughput sequencing data. Bioinformatics. https://doi.org/10.1093/bioinformatics/btu638
 
-Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]
+Andrews, S. 2010. FastQC: A Quality Control Tool for High Throughput Sequence Data [Online]
+  
+Aronesty, E. 2011. ea-utils : "Command-line tools for processing biological sequencing data"; https://github.com/ExpressionAnalysis/ea-utils
 
 BBMap - Bushnell B. - sourceforge.net/projects/bbmap/
 
