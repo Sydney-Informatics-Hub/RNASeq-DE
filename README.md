@@ -581,6 +581,8 @@ STAR/2.7.3a
 
 rseqc/4.0.0
 
+htseq-count/0.12.4
+
 bamtools/2.5.1, TPMCalculator/0.0.4
 
 ## Required (minimum) inputs/parameters
