@@ -31,6 +31,11 @@ NCPUS=`echo $1 | cut -d ',' -f 6`
 basename=$(basename "$fastq" | cut -d. -f1)
 logfile=${logdir}/${basename}_trimming.log
 
+
+# Nandan
+export PATH=$PATH:/scratch/er01/INFRA-121-CoreWorkflows-RNASeq/bbmap
+
+
 rm -rf ${logfile}
 
 bbduk.sh -Xmx6g \

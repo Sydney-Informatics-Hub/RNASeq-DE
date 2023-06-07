@@ -1,0 +1,42 @@
+#! /bin/bash
+  
+#set -e
+
+#########################################################
+#
+# Platform: NCI Gadi HPC
+#
+# Author: Nandan Deshpande
+# nandan.deshpande@sydney.edu.au
+#
+# If you use this script towards a publication, please acknowledge the
+# Sydney Informatics Hub (or co-authorship, where appropriate).
+#
+# Suggested acknowledgement:
+# The authors acknowledge the scientific and technical assistance
+# <or e.g. bioinformatics assistance of <PERSON>> of Sydney Informatics
+# Hub and resources and services from the National Computational
+# Infrastructure (NCI), which is supported by the Australian Government
+# with access facilitated by the University of Sydney.
+#
+#########################################################
+
+#PBS -P er01
+#PBS -N salmon_matrix
+#PBS -l walltime=10:00:00,ncpus=1,mem=32GB,wd
+#PBS -q normal
+#PBS -W umask=022
+#PBS -l storage=scratch/er01
+#PBS -o ./Logs/salmon_matrix.o
+#PBS -e ./Logs/salmon_matrix.e
+
+# PROVIDE PATH TO YOUR CONFIG FILE
+config=../Sample_configs/cohort.config
+
+# PROVIDE Directory path containing the quant.sf files
+#quant_dir = "../Batch_1_salmon"
+
+
+mkdir -p ./Logs
+
+python combine_salmon_quant_files.py

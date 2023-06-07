@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 #########################################################
 #
@@ -29,20 +29,23 @@ set -e
 # -l walltime=02:00:00,ncpus=48,mem=190GB,wd
 # -q normal
 
-#PBS -P <project>
+#PBS -P er01
 #PBS -N bbduk_trim
 #PBS -l walltime=02:00:00,ncpus=48,mem=190GB,wd
 #PBS -q normal
 #PBS -W umask=022
-#PBS -l storage=scratch/<project>
+#PBS -l storage=scratch/er01
 #PBS -o ./Logs/bbduk_trim.o
 #PBS -e ./Logs/bbduk_trim.e
 
 module load openmpi/4.1.0
 module load nci-parallel/1.0.0a
-module load bbtools/37.98
+#module load bbtools/37.98
 
 mkdir -p ./Logs
+
+export PATH=$PATH:/scratch/er01/INFRA-121-CoreWorkflows-RNASeq/bbmap
+
 
 # NCPUs = CPUs per task
 NCPUS=6

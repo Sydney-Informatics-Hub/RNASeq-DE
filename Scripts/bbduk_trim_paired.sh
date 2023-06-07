@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 #########################################################
 #
@@ -21,7 +21,7 @@ set -e
 #
 #########################################################
 
-module load bbtools/37.98
+#module load bbtools/37.98
 
 fastq1=`echo $1 | cut -d ',' -f 1`
 fastq2=`echo $1 | cut -d ',' -f 2`
@@ -36,7 +36,14 @@ basename=$(basename "$fastq1" | cut -d. -f1)
 uniq_basename="${basename::-1}"
 logfile=${logdir}/${uniq_basename}trimming.log
 
+
+# Nandan
+export PATH=$PATH:/scratch/er01/INFRA-121-CoreWorkflows-RNASeq/bbmap
+
 rm -rf ${logfile}
+
+
+#bbmap_PATH=/scratch/er01/INFRA-121-CoreWorkflows-RNASeq/bbmap
 
 bbduk.sh -Xmx6g \
 	threads=${NCPUS} \

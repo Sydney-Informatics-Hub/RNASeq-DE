@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 #########################################################
 #
@@ -32,27 +32,34 @@ set -e
 # Queue: express is recommended. It's a small job and the time
 # saved in queue is worth it!
 
-#PBS -P <project>
+#PBS -P er01
 #PBS -N star_index
 #PBS -l walltime=02:00:00,ncpus=9,mem=64GB,wd
 #PBS -q normal
 #PBS -W umask=022
-#PBS -l storage=scratch/<project>
+#PBS -l storage=scratch/er01+gdata/er01
 #PBS -o ./Logs/star_index.o
 #PBS -e ./Logs/star_index.e
 
 # Load modules
-module load star/2.7.3a
+#module load star/2.7.3a
 
 mkdir -p ./Logs
 
 # Change dir, ref, gtf and overhang variables below
 dir=../Reference/GRCh38
+
+
 # ref and gtf files under dir
 ref=Homo_sapiens.GRCh38.dna.primary_assembly.fa
-gtf=Homo_sapiens.GRCh38.103.gtf
+gtf=Homo_sapiens.GRCh38.94.gtf
 # sjdbOverhang = ReadLength-1 (for creating splice junction database)
 overhang=149
+
+
+export PATH=$PATH:/scratch/er01/INFRA-121-CoreWorkflows-RNASeq/star-2.7.3a/bin/
+#export PATH=/g/data/er01/apps/star/STAR-2.7.10b/source/
+#export_pATH=/g/data/er01/apps/star/2.7.3a/bin/
 
 STAR \
 	--runThreadN ${PBS_NCPUS} \

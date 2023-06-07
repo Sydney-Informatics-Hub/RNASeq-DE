@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 #########################################################
 #
@@ -39,6 +39,10 @@ lane=`echo $1 | cut -d ',' -f 10`
 flowcell=`echo $1 | cut -d ',' -f 11`
 outdir=`echo $1 | cut -d ',' -f 12`
 logfile=`echo $1 | cut -d ',' -f 13`
+
+export PATH=$PATH:/scratch/er01/INFRA-121-CoreWorkflows-RNASeq/star-2.7.3a/bin/
+#export PATH=$PATH:/g/data/er01/apps/star/2.7.3a/bin/
+
 
 echo `date` ": Mapping with STAR. Sample:$sampleid R1:$fastq1 R2: $fastq2 centre:$seqcentre platform:$platform library:$library lane:$lane flowcell:$flowcell logfile:$logfile NCPUS:$NCPUS" > ${logfile} 2>&1
 

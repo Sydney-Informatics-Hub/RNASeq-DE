@@ -47,7 +47,11 @@ mkdir -p ${logs}
 rm -rf ${single}
 rm -rf ${paired}
 
-bbtools_path="$(module display bbtools | grep -m 1 PATH | awk '{print $3}')"
+#NANDAN
+#bbtools_path="$(module display bbtools | grep -m 1 PATH | awk '{print $3}')"
+bbtools_path="/scratch/er01/INFRA-121-CoreWorkflows-RNASeq/bbmap"
+
+
 adapters=$bbtools_path/resources/adapters.fa
 
 while read -r fastq sampleid dataset reference seqcentre platform run_type library; do
@@ -81,6 +85,9 @@ while read -r fastq sampleid dataset reference seqcentre platform run_type libra
 		paired_extension="${fastq#*.}"
 		uniq_basename="${basename::-1}"
 		which_pair="${basename: -1}"
+
+		#echo "which_pair" $which_pair "----" ${basename}
+
 		if [[ ${which_pair} =~ 1 ]]; then
 			fastq1=../${dataset}/${uniq_basename}1.${paired_extension}
 			fastq2=../${dataset}/${uniq_basename}2.${paired_extension}
@@ -88,6 +95,8 @@ while read -r fastq sampleid dataset reference seqcentre platform run_type libra
 			out2=${outdir}/${uniq_basename}2_trimmed.${paired_extension}
 			seq=`zcat "../${dataset}/${fastq1}" | sed -n '2{p;q;}'`
 			readlen=${#seq}
+
+			#echo "I AM HERE>>....."
 			echo "${fastq1},${fastq2},${out1},${out2},${readlen},${logs},${adapters}" >> ${paired}
 				
 		fi

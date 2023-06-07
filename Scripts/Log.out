@@ -1,0 +1,293 @@
+STAR version=2.7.3a
+STAR compilation time,server,dir=Tue Oct 8 14:26:19 EDT 2019 vega:/home/dobin/data/STAR/STARcode/STAR.master/source
+##### Command Line:
+STAR --runThreadN 9 --runMode genomeGenerate --genomeDir ../Reference/GRCh38 --genomeFastaFiles ../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa --sjdbGTFfile ../Reference/GRCh38/Homo_sapiens.GRCh38.94.gtf --sjdbOverhang 149
+##### Initial USER parameters from Command Line:
+###### All USER parameters from Command Line:
+runThreadN                    9     ~RE-DEFINED
+runMode                       genomeGenerate     ~RE-DEFINED
+genomeDir                     ../Reference/GRCh38     ~RE-DEFINED
+genomeFastaFiles              ../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa        ~RE-DEFINED
+sjdbGTFfile                   ../Reference/GRCh38/Homo_sapiens.GRCh38.94.gtf     ~RE-DEFINED
+sjdbOverhang                  149     ~RE-DEFINED
+##### Finished reading parameters from all sources
+
+##### Final user re-defined parameters-----------------:
+runMode                           genomeGenerate
+runThreadN                        9
+genomeDir                         ../Reference/GRCh38
+genomeFastaFiles                  ../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa   
+sjdbGTFfile                       ../Reference/GRCh38/Homo_sapiens.GRCh38.94.gtf
+sjdbOverhang                      149
+
+-------------------------------
+##### Final effective command line:
+STAR   --runMode genomeGenerate   --runThreadN 9   --genomeDir ../Reference/GRCh38   --genomeFastaFiles ../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa      --sjdbGTFfile ../Reference/GRCh38/Homo_sapiens.GRCh38.94.gtf   --sjdbOverhang 149
+----------------------------------------
+
+Finished loading and checking parameters
+May 11 14:24:12 ... starting to generate Genome files
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 0  "1" chrStart: 0
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 1  "10" chrStart: 249036800
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 2  "11" chrStart: 382992384
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 3  "12" chrStart: 518258688
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 4  "13" chrStart: 651689984
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 5  "14" chrStart: 766246912
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 6  "15" chrStart: 873463808
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 7  "16" chrStart: 975699968
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 8  "17" chrStart: 1066139648
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 9  "18" chrStart: 1149501440
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 10  "19" chrStart: 1229979648
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 11  "2" chrStart: 1288699904
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 12  "20" chrStart: 1530920960
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 13  "21" chrStart: 1595408384
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 14  "22" chrStart: 1642332160
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 15  "3" chrStart: 1693188096
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 16  "4" chrStart: 1891631104
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 17  "5" chrStart: 2081947648
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 18  "6" chrStart: 2263613440
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 19  "7" chrStart: 2434531328
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 20  "8" chrStart: 2593914880
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 21  "9" chrStart: 2739142656
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 22  "MT" chrStart: 2877554688
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 23  "X" chrStart: 2877816832
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 24  "Y" chrStart: 3034054656
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 25  "KI270728.1" chrStart: 3091464192
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 26  "KI270727.1" chrStart: 3093561344
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 27  "KI270442.1" chrStart: 3094085632
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 28  "KI270729.1" chrStart: 3094609920
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 29  "GL000225.1" chrStart: 3095134208
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 30  "KI270743.1" chrStart: 3095396352
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 31  "GL000008.2" chrStart: 3095658496
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 32  "GL000009.2" chrStart: 3095920640
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 33  "KI270747.1" chrStart: 3096182784
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 34  "KI270722.1" chrStart: 3096444928
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 35  "GL000194.1" chrStart: 3096707072
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 36  "KI270742.1" chrStart: 3096969216
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 37  "GL000205.2" chrStart: 3097231360
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 38  "GL000195.1" chrStart: 3097493504
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 39  "KI270736.1" chrStart: 3097755648
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 40  "KI270733.1" chrStart: 3098017792
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 41  "GL000224.1" chrStart: 3098279936
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 42  "GL000219.1" chrStart: 3098542080
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 43  "KI270719.1" chrStart: 3098804224
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 44  "GL000216.2" chrStart: 3099066368
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 45  "KI270712.1" chrStart: 3099328512
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 46  "KI270706.1" chrStart: 3099590656
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 47  "KI270725.1" chrStart: 3099852800
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 48  "KI270744.1" chrStart: 3100114944
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 49  "KI270734.1" chrStart: 3100377088
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 50  "GL000213.1" chrStart: 3100639232
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 51  "GL000220.1" chrStart: 3100901376
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 52  "KI270715.1" chrStart: 3101163520
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 53  "GL000218.1" chrStart: 3101425664
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 54  "KI270749.1" chrStart: 3101687808
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 55  "KI270741.1" chrStart: 3101949952
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 56  "GL000221.1" chrStart: 3102212096
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 57  "KI270716.1" chrStart: 3102474240
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 58  "KI270731.1" chrStart: 3102736384
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 59  "KI270751.1" chrStart: 3102998528
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 60  "KI270750.1" chrStart: 3103260672
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 61  "KI270519.1" chrStart: 3103522816
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 62  "GL000214.1" chrStart: 3103784960
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 63  "KI270708.1" chrStart: 3104047104
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 64  "KI270730.1" chrStart: 3104309248
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 65  "KI270438.1" chrStart: 3104571392
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 66  "KI270737.1" chrStart: 3104833536
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 67  "KI270721.1" chrStart: 3105095680
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 68  "KI270738.1" chrStart: 3105357824
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 69  "KI270748.1" chrStart: 3105619968
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 70  "KI270435.1" chrStart: 3105882112
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 71  "GL000208.1" chrStart: 3106144256
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 72  "KI270538.1" chrStart: 3106406400
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 73  "KI270756.1" chrStart: 3106668544
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 74  "KI270739.1" chrStart: 3106930688
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 75  "KI270757.1" chrStart: 3107192832
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 76  "KI270709.1" chrStart: 3107454976
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 77  "KI270746.1" chrStart: 3107717120
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 78  "KI270753.1" chrStart: 3107979264
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 79  "KI270589.1" chrStart: 3108241408
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 80  "KI270726.1" chrStart: 3108503552
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 81  "KI270735.1" chrStart: 3108765696
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 82  "KI270711.1" chrStart: 3109027840
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 83  "KI270745.1" chrStart: 3109289984
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 84  "KI270714.1" chrStart: 3109552128
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 85  "KI270732.1" chrStart: 3109814272
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 86  "KI270713.1" chrStart: 3110076416
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 87  "KI270754.1" chrStart: 3110338560
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 88  "KI270710.1" chrStart: 3110600704
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 89  "KI270717.1" chrStart: 3110862848
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 90  "KI270724.1" chrStart: 3111124992
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 91  "KI270720.1" chrStart: 3111387136
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 92  "KI270723.1" chrStart: 3111649280
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 93  "KI270718.1" chrStart: 3111911424
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 94  "KI270317.1" chrStart: 3112173568
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 95  "KI270740.1" chrStart: 3112435712
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 96  "KI270755.1" chrStart: 3112697856
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 97  "KI270707.1" chrStart: 3112960000
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 98  "KI270579.1" chrStart: 3113222144
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 99  "KI270752.1" chrStart: 3113484288
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 100  "KI270512.1" chrStart: 3113746432
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 101  "KI270322.1" chrStart: 3114008576
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 102  "GL000226.1" chrStart: 3114270720
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 103  "KI270311.1" chrStart: 3114532864
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 104  "KI270366.1" chrStart: 3114795008
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 105  "KI270511.1" chrStart: 3115057152
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 106  "KI270448.1" chrStart: 3115319296
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 107  "KI270521.1" chrStart: 3115581440
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 108  "KI270581.1" chrStart: 3115843584
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 109  "KI270582.1" chrStart: 3116105728
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 110  "KI270515.1" chrStart: 3116367872
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 111  "KI270588.1" chrStart: 3116630016
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 112  "KI270591.1" chrStart: 3116892160
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 113  "KI270522.1" chrStart: 3117154304
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 114  "KI270507.1" chrStart: 3117416448
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 115  "KI270590.1" chrStart: 3117678592
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 116  "KI270584.1" chrStart: 3117940736
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 117  "KI270320.1" chrStart: 3118202880
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 118  "KI270382.1" chrStart: 3118465024
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 119  "KI270468.1" chrStart: 3118727168
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 120  "KI270467.1" chrStart: 3118989312
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 121  "KI270362.1" chrStart: 3119251456
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 122  "KI270517.1" chrStart: 3119513600
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 123  "KI270593.1" chrStart: 3119775744
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 124  "KI270528.1" chrStart: 3120037888
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 125  "KI270587.1" chrStart: 3120300032
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 126  "KI270364.1" chrStart: 3120562176
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 127  "KI270371.1" chrStart: 3120824320
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 128  "KI270333.1" chrStart: 3121086464
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 129  "KI270374.1" chrStart: 3121348608
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 130  "KI270411.1" chrStart: 3121610752
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 131  "KI270414.1" chrStart: 3121872896
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 132  "KI270510.1" chrStart: 3122135040
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 133  "KI270390.1" chrStart: 3122397184
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 134  "KI270375.1" chrStart: 3122659328
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 135  "KI270420.1" chrStart: 3122921472
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 136  "KI270509.1" chrStart: 3123183616
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 137  "KI270315.1" chrStart: 3123445760
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 138  "KI270302.1" chrStart: 3123707904
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 139  "KI270518.1" chrStart: 3123970048
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 140  "KI270530.1" chrStart: 3124232192
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 141  "KI270304.1" chrStart: 3124494336
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 142  "KI270418.1" chrStart: 3124756480
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 143  "KI270424.1" chrStart: 3125018624
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 144  "KI270417.1" chrStart: 3125280768
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 145  "KI270508.1" chrStart: 3125542912
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 146  "KI270303.1" chrStart: 3125805056
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 147  "KI270381.1" chrStart: 3126067200
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 148  "KI270529.1" chrStart: 3126329344
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 149  "KI270425.1" chrStart: 3126591488
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 150  "KI270396.1" chrStart: 3126853632
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 151  "KI270363.1" chrStart: 3127115776
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 152  "KI270386.1" chrStart: 3127377920
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 153  "KI270465.1" chrStart: 3127640064
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 154  "KI270383.1" chrStart: 3127902208
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 155  "KI270384.1" chrStart: 3128164352
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 156  "KI270330.1" chrStart: 3128426496
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 157  "KI270372.1" chrStart: 3128688640
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 158  "KI270548.1" chrStart: 3128950784
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 159  "KI270580.1" chrStart: 3129212928
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 160  "KI270387.1" chrStart: 3129475072
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 161  "KI270391.1" chrStart: 3129737216
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 162  "KI270305.1" chrStart: 3129999360
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 163  "KI270373.1" chrStart: 3130261504
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 164  "KI270422.1" chrStart: 3130523648
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 165  "KI270316.1" chrStart: 3130785792
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 166  "KI270340.1" chrStart: 3131047936
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 167  "KI270338.1" chrStart: 3131310080
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 168  "KI270583.1" chrStart: 3131572224
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 169  "KI270334.1" chrStart: 3131834368
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 170  "KI270429.1" chrStart: 3132096512
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 171  "KI270393.1" chrStart: 3132358656
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 172  "KI270516.1" chrStart: 3132620800
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 173  "KI270389.1" chrStart: 3132882944
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 174  "KI270466.1" chrStart: 3133145088
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 175  "KI270388.1" chrStart: 3133407232
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 176  "KI270544.1" chrStart: 3133669376
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 177  "KI270310.1" chrStart: 3133931520
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 178  "KI270412.1" chrStart: 3134193664
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 179  "KI270395.1" chrStart: 3134455808
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 180  "KI270376.1" chrStart: 3134717952
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 181  "KI270337.1" chrStart: 3134980096
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 182  "KI270335.1" chrStart: 3135242240
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 183  "KI270378.1" chrStart: 3135504384
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 184  "KI270379.1" chrStart: 3135766528
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 185  "KI270329.1" chrStart: 3136028672
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 186  "KI270419.1" chrStart: 3136290816
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 187  "KI270336.1" chrStart: 3136552960
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 188  "KI270312.1" chrStart: 3136815104
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 189  "KI270539.1" chrStart: 3137077248
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 190  "KI270385.1" chrStart: 3137339392
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 191  "KI270423.1" chrStart: 3137601536
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 192  "KI270392.1" chrStart: 3137863680
+../Reference/GRCh38/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 193  "KI270394.1" chrStart: 3138125824
+Estimated genome size=3437387968   3138387968   299000000
+GstrandBit=32
+Number of SA indices: 5891698134
+May 11 14:25:07 ... starting to sort Suffix Array. This may take a long time...
+Number of chunks: 31;   chunks size limit: 1648213600 bytes
+May 11 14:25:22 ... sorting Suffix Array chunks and saving them to disk...
+Writing 1629424888 bytes into ../Reference/GRCh38/SA_8 ; empty space on disk = 5428032315809792 bytes ... done
+Writing 1342759056 bytes into ../Reference/GRCh38/SA_0 ; empty space on disk = 5428127937675264 bytes ... done
+Writing 1446316664 bytes into ../Reference/GRCh38/SA_2 ; empty space on disk = 5429856723918848 bytes ...Writing 1595335840 bytes into ../Reference/GRCh38/SA_6 ; empty space on disk = 5429856723918848 bytes ... done
+ done
+Writing 1636656400 bytes into ../Reference/GRCh38/SA_3 ; empty space on disk = 5429723997896704 bytes ... done
+Writing 1620627640 bytes into ../Reference/GRCh38/SA_5 ; empty space on disk = 5429698064150528 bytes ... done
+Writing 1533095336 bytes into ../Reference/GRCh38/SA_7 ; empty space on disk = 5429658152542208 bytes ... done
+Writing 1489135016 bytes into ../Reference/GRCh38/SA_1 ; empty space on disk = 5429616308445184 bytes ... done
+Writing 1643333448 bytes into ../Reference/GRCh38/SA_4 ; empty space on disk = 5429213892984832 bytes ... done
+Writing 1573097424 bytes into ../Reference/GRCh38/SA_11 ; empty space on disk = 5427652728614912 bytes ... done
+Writing 1536138392 bytes into ../Reference/GRCh38/SA_10 ; empty space on disk = 5427884135931904 bytes ... done
+Writing 1613223744 bytes into ../Reference/GRCh38/SA_12 ; empty space on disk = 5427379431768064 bytes ...Writing 1609091464 bytes into ../Reference/GRCh38/SA_9 ; empty space on disk = 5427379431768064 bytes ... done
+ done
+Writing 1313275680 bytes into ../Reference/GRCh38/SA_14 ; empty space on disk = 5427109796376576 bytes ... done
+Writing 1609929768 bytes into ../Reference/GRCh38/SA_17 ; empty space on disk = 5426778176299008 bytes ... done
+Writing 1565259112 bytes into ../Reference/GRCh38/SA_16 ; empty space on disk = 5426766769491968 bytes ... done
+Writing 1638588456 bytes into ../Reference/GRCh38/SA_13 ; empty space on disk = 5426608788611072 bytes ... done
+Writing 1596179216 bytes into ../Reference/GRCh38/SA_15 ; empty space on disk = 5426551030239232 bytes ... done
+Writing 1586945440 bytes into ../Reference/GRCh38/SA_19 ; empty space on disk = 5426431878516736 bytes ... done
+Writing 1486267400 bytes into ../Reference/GRCh38/SA_18 ; empty space on disk = 5428252379893760 bytes ... done
+Writing 1525793408 bytes into ../Reference/GRCh38/SA_21 ; empty space on disk = 5428128334647296 bytes ... done
+Writing 1572779400 bytes into ../Reference/GRCh38/SA_20 ; empty space on disk = 5428068830248960 bytes ... done
+Writing 1467328240 bytes into ../Reference/GRCh38/SA_23 ; empty space on disk = 5428234197962752 bytes ... done
+Writing 1563753544 bytes into ../Reference/GRCh38/SA_22 ; empty space on disk = 5428215580839936 bytes ... done
+Writing 1527182736 bytes into ../Reference/GRCh38/SA_26 ; empty space on disk = 5427569563115520 bytes ... done
+Writing 1485515336 bytes into ../Reference/GRCh38/SA_25 ; empty space on disk = 5426602670018560 bytes ... done
+Writing 1567104144 bytes into ../Reference/GRCh38/SA_24 ; empty space on disk = 5426206036623360 bytes ... done
+Writing 1073974872 bytes into ../Reference/GRCh38/SA_30 ; empty space on disk = 5426116309671936 bytes ... done
+Writing 1386846088 bytes into ../Reference/GRCh38/SA_27 ; empty space on disk = 5426070811123712 bytes ... done
+Writing 1393339448 bytes into ../Reference/GRCh38/SA_29 ; empty space on disk = 5425369986650112 bytes ... done
+Writing 1505287472 bytes into ../Reference/GRCh38/SA_28 ; empty space on disk = 5424790991126528 bytes ... done
+May 11 14:51:15 ... loading chunks from disk, packing SA...
+May 11 14:54:16 ... finished generating suffix array
+May 11 14:54:16 ... generating Suffix Array index
+May 11 14:58:02 ... completed Suffix Array index
+May 11 14:58:02 ..... processing annotations GTF
+Processing pGe.sjdbGTFfile=../Reference/GRCh38/Homo_sapiens.GRCh38.94.gtf, found:
+		206601 transcripts
+		1262162 exons (non-collapsed)
+		361254 collapsed junctions
+May 11 14:58:14 ..... finished GTF processing
+May 11 14:58:14   Loaded database junctions from the GTF file: ../Reference/GRCh38/Homo_sapiens.GRCh38.94.gtf: 361254 total junctions
+
+WARNING: long repeat for junction # 119885 : 15 88855522 88855578; left shift = 14; right shift = 255
+May 11 14:58:14   Finished preparing junctions
+May 11 14:58:14 ..... inserting junctions into the genome indices
+May 11 14:59:27   Finished SA search: number of new junctions=361195, old junctions=0
+May 11 15:00:29   Finished sorting SA indicesL nInd=215272196
+Genome size with junctions=3246385273  3138387968   107997305
+GstrandBit1=32   GstrandBit=32
+May 11 15:01:40   Finished inserting junction indices
+May 11 15:02:09   Finished SAi
+May 11 15:02:09 ..... finished inserting junctions into genome
+May 11 15:02:09 ... writing Genome to disk ...
+Writing 3246385273 bytes into ../Reference/GRCh38/Genome ; empty space on disk = 5422335703302144 bytes ... done
+SA size in bytes: 25191252615
+May 11 15:02:15 ... writing Suffix Array to disk ...
+Writing 25191252615 bytes into ../Reference/GRCh38/SA ; empty space on disk = 5422341381828608 bytes ... done
+May 11 15:02:48 ... writing SAindex to disk
+Writing 8 bytes into ../Reference/GRCh38/SAindex ; empty space on disk = 5422385546698752 bytes ... done
+Writing 120 bytes into ../Reference/GRCh38/SAindex ; empty space on disk = 5422385546698752 bytes ... done
+Writing 1565873491 bytes into ../Reference/GRCh38/SAindex ; empty space on disk = 5422385546698752 bytes ... done
+May 11 15:02:51 ..... finished successfully
+DONE: Genome generation, EXITING

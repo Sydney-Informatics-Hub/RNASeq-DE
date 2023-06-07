@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 #########################################################
 #
@@ -27,12 +27,12 @@ set -e
 # -q normal
 # fastQC efficiency ~0.9 - 1
 
-#PBS -P <project>
-#PBS -N fastqc
-#PBS -l walltime=01:30:00,ncpus=48,mem=190GB,wd
+#PBS -P er01
+#PBS -N fastqc1
+#PBS -l walltime=01:30:00,ncpus=12,mem=80GB,wd
 #PBS -q normal
 #PBS -W umask=022
-#PBS -l storage=scratch/<project>
+#PBS -l storage=scratch/er01
 #PBS -o ./Logs/fastqc.o
 #PBS -e ./Logs/fastqc.e
 

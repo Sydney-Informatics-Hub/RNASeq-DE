@@ -29,8 +29,27 @@ strand=`echo $1 | cut -d ',' -f 5`
 logfile=`echo $1 | cut -d ',' -f 6`
 NCPUS=`echo $1 | cut -d ',' -f 7`
 
-module load python3/3.8.5
-export PYTHONPATH=$HOME/.local/lib/python3.8/site-packages
+#module load python3/3.8.5
+#module load python3/3.11.0
+
+
+#export PYTHONPATH=$HOME/.local/lib/python3.8/site-packages
+#export PYTHONPATH=/home/561/npd561/.local/lib/python3.8/site-packages
+#export PYTHONPATH=/apps/python3/3.11.0/bin/python3.11/site-packages
+
+
+#conda create -n htseq_env
+conda init bash
+
+# Activate the conda environment
+source ~/.bashrc
+
+conda activate htseq_env
+#	conda init  bash
+#	Restart the terminal
+#htseq-count --version
+
+
 
 echo $PYTHONPATH
 
@@ -42,4 +61,8 @@ rm -rf ${logfile}
 
 echo "$(date): Running htseq-count to obtain raw counts. Sample ID:${sampleid}, BAM:${bam}, Cohort:${cohort}, Reference:${gtf}, Strand:${strand}, Output:${out}, Log file:${logfile}, NCPUS:${NCPUS}" >> ${logfile} 2>&1 
 
-$HOME/.local/bin/htseq-count -f bam -r pos --mode=union -s ${strand} ${bam} ${gtf} > ${out}
+#$HOME/.local/bin/htseq-count -f bam -r pos --mode=union -s ${strand} ${bam} ${gtf} > ${out}
+
+htseq-count -f bam -r pos --mode=union -s ${strand} ${bam} ${gtf} > ${out}
+
+

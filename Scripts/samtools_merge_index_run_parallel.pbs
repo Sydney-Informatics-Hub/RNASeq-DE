@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 #########################################################
 #
@@ -37,12 +37,12 @@ set -e
 # ~882 samples including ~10 multiplexed, use
 # #PBS -l walltime=05:00:00,ncpus=48,mem=190GB,wd
 
-#PBS -P <project>
+#PBS -P er01
 #PBS -N samtools_merge_index
-#PBS -l walltime=5:00:00,ncpus=48,mem=190GB,wd
+#PBS -l walltime=1:00:00,ncpus=12,mem=80GB,wd
 #PBS -q normal
 #PBS -W umask=022
-#PBS -l storage=scratch/<project>
+#PBS -l storage=scratch/er01
 #PBS -o ./Logs/samtools_merge_index.o
 #PBS -e ./Logs/samtools_merge_index.e
 

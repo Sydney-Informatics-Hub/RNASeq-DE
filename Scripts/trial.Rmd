@@ -1,0 +1,31 @@
+```{r}
+#install.packages("knitr")
+#install.packages("rprojroot")
+install.packages("RcppArmadillo")
+
+
+#install_folder <- "/g/data/er01/apps/R-libraries"
+#if (!require("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+
+#BiocManager::install("DESeq2", lib = install_folder)
+```
+
+```{r}
+
+# Tab : Libraries
+# -------------
+
+library(knitr)
+
+
+
+library(DESeq2)
+```
+
+
+```{r}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+

@@ -28,12 +28,12 @@ set -e
 # JobName        CPUs_requested  CPUs_used       Mem_requested   Mem_used        CPUtime CPUtime_mins    Walltime_req    Walltime_used   Walltime_mins   JobFS_req        JobFS_used      Efficiency      Service_units(CPU_hours)        Job_exit_status
 # read_distribution.o     56      56      256.0GB 175.35GB        89:44:14        5384.23 02:00:00        01:50:20        110.33  200.0MB 8.16MB  0.87    128.72   0
 
-#PBS -P <project>
+#PBS -P er01
 #PBS -N read_distribution
-#PBS -l walltime=04:00:00,ncpus=56,mem=256GB,wd
+#PBS -l walltime=04:00:00,ncpus=06,mem=128GB,wd
 #PBS -q normalbw
 #PBS -W umask=022
-#PBS -l storage=scratch/<project>
+#PBS -l storage=scratch/er01
 #PBS -o ./Logs/read_distribution.o
 #PBS -e ./Logs/read_distribution.e
 

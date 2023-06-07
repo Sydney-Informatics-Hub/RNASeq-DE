@@ -21,26 +21,26 @@ set -e
 #
 #########################################################
 
-# Inputs required by star single: reference, sampleid, fastq, out
-# Inputs requred by star paired: reference, sampleid, fastq1, fastq2, out
+# Inputs required by salmon single: reference, sampleid, fastq, out
+# Inputs requred by salmon paired: reference, sampleid, fastq1, fastq2, out
 # Assumes trimming was performed with bbduk_trim_run_parallel.pbs
 # Need to sort to align fastq with most reads - least reads for CPU efficiency
 
 if [ -z "$1" ]
 then
-        echo "Please provide the path to your config file, e.g. sh star_align_trimmed_make_input.sh ../samples.config"
+        echo "Please provide the path to your config file, e.g. sh salmon_align_trimmed_make_input.sh ../samples.config"
         exit
 fi
 
 config=$1
 cohort=$(basename "$config" | cut -d'.' -f 1)
 INPUTS=./Inputs
-single=${INPUTS}/star_align_single.inputs
-paired=${INPUTS}/star_align_paired.inputs
-unsort_single=${INPUTS}/star_single_unsort.inputs
-unsort_paired=${INPUTS}/star_paired_unsort.inputs
-singletmp=${INPUTS}/star_single.tmp
-pairedtmp=${INPUTS}/star_paired.tmp
+single=${INPUTS}/salmon_align_single.inputs
+paired=${INPUTS}/salmon_align_paired.inputs
+unsort_single=${INPUTS}/salmon_single_unsort.inputs
+unsort_paired=${INPUTS}/salmon_paired_unsort.inputs
+singletmp=${INPUTS}/salmon_single.tmp
+pairedtmp=${INPUTS}/salmon_paired.tmp
 
 mkdir -p ${INPUTS}
 
@@ -61,8 +61,8 @@ while read -r fastq sampleid dataset reference seqcentre pl run_type library; do
 	
 	if [[ ! ${fastq} =~ ^#.*$ && ${run_type} =~ single ]]; then
 		indir=../${dataset}_trimmed
-		outdir=../${dataset}_STAR
-		logdir=./Logs/star_align_trimmed/${dataset}
+		outdir=../${dataset}_salmon
+		logdir=./Logs/salmon_align_trimmed/${dataset}
 			
 		mkdir -p ${outdir}
 		mkdir -p ${logdir}
@@ -88,8 +88,8 @@ while read -r fastq sampleid dataset reference seqcentre pl run_type library; do
 		
 	elif [[ ! ${fastq} =~ ^#.*$ && ${run_type} =~ PAIRED ]]; then
 		indir=../${dataset}_trimmed
-		outdir=../${dataset}_STAR
-		logdir=./Logs/star_align_trimmed/${dataset}
+		outdir=../${dataset}_salmon
+		logdir=./Logs/salmon_align_trimmed/${dataset}
 
 		mkdir -p ${outdir}
 		mkdir -p ${logdir}

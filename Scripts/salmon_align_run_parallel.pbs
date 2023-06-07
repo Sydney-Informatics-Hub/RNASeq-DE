@@ -21,43 +21,56 @@
 #
 #########################################################
 
-# Run star_align_trimmed_make_input.sh first
-# align RNA seq fastq files using STAR
-# 24 CPUs, 96Gb memory required per human/mouse sample
-# For 96 paired FASTQs, 120 - 150M Seqs per pair
-#  -l walltime=01:00:00,ncpus=768,mem=3040GB,wd
 # can map paired and single reads in a single job
 # Should scale to the number of reads in FASTQ file
 
+#======================================================================================
+#                  Resource Usage on 2023-05-12 22:01:30:
+#   Job Id:             83363636.gadi-pbs
+#   Project:            er01
+#   Exit Status:        0
+#   Service Units:      8.59
+#   NCPUs Requested:    12                     NCPUs Used: 12
+#                                        CPU Time Used: 02:39:10
+#   Memory Requested:   64.0GB                Memory Used: 35.93GB
+#   Walltime requested: 02:00:00            Walltime Used: 00:16:06
+#   JobFS requested:    100.0MB                JobFS used: 0B
+#======================================================================================
+
+
+
 #PBS -P er01
-#PBS -N star_align_trimmed_with_unmapped
-#PBS -l walltime=01:30:00,ncpus=240,mem=950GB,wd
+#PBS -N salmon_align_trimmed
+#PBS -l walltime=01:00:00,ncpus=96,mem=240GB,wd
 #PBS -q normal
 #PBS -W umask=022
 #PBS -l storage=scratch/er01+gdata/er01
-#PBS -o ./Logs/star_align_trimmed_unmapped_out.o
-#PBS -e ./Logs/star_align_trimmed_unmapped_out.e
+#PBS -o ./Logs/salmon_align_trimmed_unmapped_out.o
+#PBS -e ./Logs/salmon_align_trimmed_unmapped_out.e
 
 module load openmpi/4.0.2
 module load nci-parallel/1.0.0a
 #Nandan
-#module load star/2.7.3a
 
 mkdir -p ./Logs
 
 # NCPUs = CPUs per task
-NCPUS=24
+NCPUS=12
 
 INPUTS=./Inputs
-paired=${INPUTS}/star_align_paired.inputs
-single=${INPUTS}/star_align_single.inputs
+paired=${INPUTS}/salmon_align_paired.inputs
+single=${INPUTS}/salmon_align_single.inputs
 
-PAIRED_SCRIPT=./star_align_paired.sh
-SINGLE_SCRIPT=./star_align_single.sh
+PAIRED_SCRIPT=./salmon_align_paired.sh
+SINGLE_SCRIPT=./salmon_align_single.sh
 
-export PATH=$PATH:/scratch/er01/INFRA-121-CoreWorkflows-RNASeq/star-2.7.3a/bin/
-#export PATH=$PATH:/g/data/er01/apps/star/2.7.3a/bin
 
+
+
+# Activate the conda environment
+conda init bash
+source ~/.bashrc
+conda activate salmon
 
 
 #########################################################
