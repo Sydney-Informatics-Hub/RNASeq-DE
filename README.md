@@ -1,5 +1,12 @@
 # RNASeq-DE
 
+# ⚠️ Notice of workflow deprecation
+This workflow is no longer actively supported or maintained. While you are welcome to use the existing code, please note that no further updates, bug fixes, or support will be provided.
+
+For questions or alternative recommendations for University of Sydney staff and students, please get in touch with sih_info@sydney.edu.au. You can find alternatives at [WorkflowHub](https://workflowhub.eu/).
+
+Thank you for your understanding!
+
   - [Description](#description)
   - [User guide](#user-guide)
       - [Set up](#set-up)
